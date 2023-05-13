@@ -1,6 +1,9 @@
 package www.iesmurgi.intercambium_app.db
 
+import android.content.Context
 import com.firebase.ui.auth.IdpResponse
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -8,10 +11,11 @@ class DbUtils {
     companion object {
         const val COLLECTION_USERS = "users"
 
-        private fun getDefaultUserData(): HashMap<String, String> {
+        private fun getDefaultUserData(): MutableMap<String, String> {
             return hashMapOf(
                 "name" to "",
-                "phone" to "",
+                "phoneNumber" to "",
+                "photoUrl" to "",
             )
         }
 
@@ -19,9 +23,18 @@ class DbUtils {
             println(response)
             val db = Firebase.firestore
             val data = getDefaultUserData()
+            data["name"] = response.user.name ?: ""
+            data["photoNumber"] = response.phoneNumber ?: ""
+            data["photoUrl"] = (response.user.photoUri ?: "") as String
+            val email = response.email.toString()
+
+            // If name is not specified, then take first part of the email
+            if (data["name"]?.isEmpty() != false) {
+                data["name"] = email.substringBefore("@")
+            }
 
             db.collection(COLLECTION_USERS)
-                .document(response.email.toString())
+                .document(email)
                 .set(data)
         }
     }
