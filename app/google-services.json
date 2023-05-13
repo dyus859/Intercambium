@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "300626773090",
+    "project_id": "intercambium-app",
+    "storage_bucket": "intercambium-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300626773090:android:057cabb5ba2cdbbc053d3b",
+        "android_client_info": {
+          "package_name": "www.iesmurgi.intercambium_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "300626773090-fmkjigegmeh5hl5rhpsmsdvdsscsuqer.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "www.iesmurgi.intercambium_app",
+            "certificate_hash": "8d9d22cdeeb3ec2711f2063147cd609f909ae888"
+          }
+        },
+        {
+          "client_id": "300626773090-rslfculte1d1dq2obj9l26v2o0fohuep.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCX-KI25BrQVZwkFmAHMUCvTa8VCmRcoyI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "300626773090-5sc6r8gfumkmlfjas4ftpk00bkks203g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
