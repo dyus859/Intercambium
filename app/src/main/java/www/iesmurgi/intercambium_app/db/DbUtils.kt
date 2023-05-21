@@ -1,16 +1,12 @@
 package www.iesmurgi.intercambium_app.db
 
-import android.content.Context
 import com.firebase.ui.auth.IdpResponse
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import www.iesmurgi.intercambium_app.utils.Constants
 
 class DbUtils {
     companion object {
-        const val COLLECTION_USERS = "users"
-
         private fun getDefaultUserData(): MutableMap<String, String> {
             return hashMapOf(
                 "name" to "",
@@ -33,7 +29,7 @@ class DbUtils {
                 data["name"] = email.substringBefore("@")
             }
 
-            db.collection(COLLECTION_USERS)
+            db.collection(Constants.COLLECTION_USERS)
                 .document(email)
                 .set(data)
         }
