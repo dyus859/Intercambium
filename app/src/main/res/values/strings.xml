@@ -11,4 +11,5 @@
     <string name="edit_image_title">Selecciona una opción para añadir imagen</string>
     <string name="error_title_min_length">El título es demasiado corto</string>
     <string name="error_desc_min_length">La descripción es demasiado corta</string>
+    <string name="sign_in_with_google">Iniciar sesión con Google</string>
 </resources>

@@ -17,14 +17,11 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.DialogSignOutBinding
 import www.iesmurgi.intercambium_app.databinding.FragmentProfileBinding
 import www.iesmurgi.intercambium_app.db.DbUtils
+import www.iesmurgi.intercambium_app.utils.Utils
 
 class ProfileFragment : Fragment() {
 
-    private var _binding: FragmentProfileBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentProfileBinding
 
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -39,7 +36,7 @@ class ProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         createListeners()
@@ -47,12 +44,13 @@ class ProfileFragment : Fragment() {
         // Enable options menu
         setHasOptionsMenu(true)
 
-        return root
-    }
+        // Set Sign In button text
+        Utils.setGooglePlusButtonText(
+            binding.signInBtnProfile,
+            getString(R.string.sign_in_with_google)
+        )
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        return root
     }
 
     private fun createListeners() {

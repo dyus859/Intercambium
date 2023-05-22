@@ -1,18 +1,18 @@
 package www.iesmurgi.intercambium_app.utils
 
-import android.app.Activity
 import android.content.Context
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
+import android.view.View
+import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
+import com.google.android.gms.common.SignInButton
 import www.iesmurgi.intercambium_app.BuildConfig
 import www.iesmurgi.intercambium_app.models.Ad
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 object Utils {
     fun getAdData(ad: Ad): HashMap<String, Any> {
@@ -48,5 +48,17 @@ object Utils {
         }
 
         return FileProvider.getUriForFile(context, "${BuildConfig.APPLICATION_ID}.provider", tmpFile)
+    }
+
+    // https://stackoverflow.com/a/18644355
+    fun setGooglePlusButtonText(signInButton: SignInButton, buttonText: String?) {
+        // Find the TextView that is inside of the SignInButton and set its text
+        for (i in 0 until signInButton.childCount) {
+            val v: View = signInButton.getChildAt(i)
+            if (v is TextView) {
+                v.text = buttonText
+                return
+            }
+        }
     }
 }
