@@ -18,14 +18,45 @@
         app:layout_constraintVertical_bias="0.1"
         app:srcCompat="@drawable/logo_text2" />
 
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/sign_in_btn_profile"
-        android:layout_width="wrap_content"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sign_in_google"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:buttonSize="wide"
+        android:drawableLeft="@drawable/google_smaller"
+        android:text="@string/sign_in_with_google"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:backgroundTint="@android:color/transparent"
+        app:cornerRadius="8dp"
+        app:rippleColor="#33AAAAAA"
+        app:strokeColor="@color/black"
+        app:strokeWidth="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sign_in_email"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/email_smaller"
+        android:text="@string/sign_in_with_email"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:backgroundTint="@android:color/transparent"
+        app:cornerRadius="8dp"
+        app:rippleColor="#33AAAAAA"
+        app:strokeColor="@color/black"
+        app:strokeWidth="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sign_in_google"
+        app:layout_constraintVertical_bias="0.01"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

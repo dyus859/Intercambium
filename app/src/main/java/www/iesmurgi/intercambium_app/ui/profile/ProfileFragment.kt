@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
@@ -23,7 +24,7 @@ class ProfileFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileBinding
 
-    private val signInLauncher = registerForActivityResult(
+    private val signInGoogleLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
     ) { res ->
         onSignInResult(res)
@@ -44,12 +45,6 @@ class ProfileFragment : Fragment() {
         // Enable options menu
         setHasOptionsMenu(true)
 
-        // Set Sign In button text
-        Utils.setGooglePlusButtonText(
-            binding.signInBtnProfile,
-            getString(R.string.sign_in_with_google)
-        )
-
         return root
     }
 
@@ -59,16 +54,22 @@ class ProfileFragment : Fragment() {
             setUserAuthenticated(authenticated)
         }
 
-        val signInButton: SignInButton = binding.signInBtnProfile
-        signInButton.setOnClickListener {
-            signInWithGoogle(signInLauncher)
+        val signInEmailBtn: Button = binding.signInEmail
+        signInEmailBtn.setOnClickListener {
+//            signInWithEmail()
+        }
+
+        val signInGoogleBtn: Button = binding.signInGoogle
+        signInGoogleBtn.setOnClickListener {
+            signInWithGoogle(signInGoogleLauncher)
         }
     }
 
     private fun setUserAuthenticated(authenticated: Boolean) {
         val map = mutableMapOf(
             binding.sivLogoProfile to false,
-            binding.signInBtnProfile to false,
+            binding.signInEmail to false,
+            binding.signInGoogle to false,
         )
 
         map.forEach { (key, value) ->
@@ -85,6 +86,7 @@ class ProfileFragment : Fragment() {
         } else if (showLogoutMessage) {
             showLogoutMessage = false
             Toast.makeText(activity, getString(R.string.signed_out), Toast.LENGTH_LONG).show()
+            Utils.navigateToFragment(view, R.id.navigation_home)
         }
     }
 

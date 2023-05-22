@@ -20,6 +20,7 @@ import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.models.adapters.AdAdapter
 import www.iesmurgi.intercambium_app.ui.AddAdActivity
 import www.iesmurgi.intercambium_app.utils.Constants
+import www.iesmurgi.intercambium_app.utils.Utils
 
 class HomeFragment : Fragment() {
 
@@ -77,9 +78,7 @@ class HomeFragment : Fragment() {
     private fun onItemClick(ad: Ad) {
         // User is not authorized, so open the profile to authorize
         if (FirebaseAuth.getInstance().currentUser == null) {
-            val navController = view?.findNavController()
-            navController?.popBackStack()
-            navController?.navigate(R.id.navigation_profile)
+            Utils.navigateToFragment(view, R.id.navigation_profile)
             return
         }
     }

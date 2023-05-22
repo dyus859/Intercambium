@@ -6,8 +6,10 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
+import androidx.navigation.findNavController
 import com.google.android.gms.common.SignInButton
 import www.iesmurgi.intercambium_app.BuildConfig
+import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.models.Ad
 import java.io.File
 import java.text.SimpleDateFormat
@@ -50,15 +52,9 @@ object Utils {
         return FileProvider.getUriForFile(context, "${BuildConfig.APPLICATION_ID}.provider", tmpFile)
     }
 
-    // https://stackoverflow.com/a/18644355
-    fun setGooglePlusButtonText(signInButton: SignInButton, buttonText: String?) {
-        // Find the TextView that is inside of the SignInButton and set its text
-        for (i in 0 until signInButton.childCount) {
-            val v: View = signInButton.getChildAt(i)
-            if (v is TextView) {
-                v.text = buttonText
-                return
-            }
-        }
+    fun navigateToFragment(view: View?, resId: Int) {
+        val navController = view?.findNavController()
+        navController?.popBackStack()
+        navController?.navigate(resId)
     }
 }
