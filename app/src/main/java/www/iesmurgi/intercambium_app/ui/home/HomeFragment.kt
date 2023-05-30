@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -36,6 +35,7 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         handleAddButton()
+        handleSwipeRefresh()
 
         return root
     }
@@ -57,6 +57,13 @@ class HomeFragment : Fragment() {
         binding.fabAddHome.setOnClickListener {
             val intent = Intent(activity!!, AddAdActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun handleSwipeRefresh() {
+        val swipeRefreshLayout = binding.swipeRefreshLayoutHome
+        swipeRefreshLayout.setOnRefreshListener {
+            recyclerView()
         }
     }
 
@@ -145,6 +152,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun handleNoAdsMsg() {
+        binding.swipeRefreshLayoutHome.isRefreshing = false
+
         if (adapter.adList.size == 0) {
             binding.tvNoAdsHome.visibility = View.VISIBLE
         } else {
