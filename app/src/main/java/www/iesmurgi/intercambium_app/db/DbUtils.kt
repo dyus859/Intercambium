@@ -15,9 +15,7 @@ class DbUtils {
             )
         }
 
-        fun createNewUser(response: IdpResponse) {
-            println(response)
-            val db = Firebase.firestore
+        fun createNewUserWithGoogle(response: IdpResponse) {
             val data = getDefaultUserData()
             data["name"] = response.user.name ?: ""
             data["photoNumber"] = response.phoneNumber ?: ""
@@ -29,6 +27,19 @@ class DbUtils {
                 data["name"] = email.substringBefore("@")
             }
 
+            createNewUserDocument(email, data)
+        }
+
+        fun createNewUserWithEmail(email: String) {
+            val data = getDefaultUserData()
+            data["name"] = email.substringBefore("@")
+
+            createNewUserDocument(email, data)
+        }
+
+        private fun createNewUserDocument(email: String, data: MutableMap<String, String>) {
+            println("DOCUMENT: ${email}, data: ${data}")
+            val db = Firebase.firestore
             db.collection(Constants.COLLECTION_USERS)
                 .document(email)
                 .set(data)

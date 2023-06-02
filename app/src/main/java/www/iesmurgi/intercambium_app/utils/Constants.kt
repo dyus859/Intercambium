@@ -35,4 +35,11 @@ object Constants {
 
     const val STORAGE_FILE_FORMAT = "yyyy_MM_dd_HH_mm_ss"
     const val STORAGE_IMAGES_PATH = "images/"
+
+    /************************************************************
+     ************************************************************
+     ************************************************************/
+
+    // Minimum length of the password to sign up
+    const val MIN_PASSWORD_LENGTH = 6
 }

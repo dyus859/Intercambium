@@ -12,12 +12,12 @@ import androidx.fragment.app.Fragment
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.android.gms.common.SignInButton
 import com.google.firebase.auth.FirebaseAuth
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.DialogSignOutBinding
 import www.iesmurgi.intercambium_app.databinding.FragmentProfileBinding
 import www.iesmurgi.intercambium_app.db.DbUtils
+import www.iesmurgi.intercambium_app.ui.LoginEmailActivity
 import www.iesmurgi.intercambium_app.utils.Utils
 
 class ProfileFragment : Fragment() {
@@ -56,7 +56,7 @@ class ProfileFragment : Fragment() {
 
         val signInEmailBtn: Button = binding.signInEmail
         signInEmailBtn.setOnClickListener {
-//            signInWithEmail()
+            signInWithEmail()
         }
 
         val signInGoogleBtn: Button = binding.signInGoogle
@@ -90,6 +90,11 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun signInWithEmail() {
+        val intent = Intent(activity?.applicationContext, LoginEmailActivity::class.java)
+        startActivity(intent)
+    }
+
     private fun signInWithGoogle(signInLauncher: ActivityResultLauncher<Intent>) {
         val providerGoogle = arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build())
 
@@ -109,7 +114,7 @@ class ProfileFragment : Fragment() {
                 val response = result.idpResponse
                 // If it is a new account, insert data into the DB
                 if ((response != null) && response.isNewUser) {
-                    DbUtils.createNewUser(response)
+                    DbUtils.createNewUserWithGoogle(response)
                 }
             }
         }

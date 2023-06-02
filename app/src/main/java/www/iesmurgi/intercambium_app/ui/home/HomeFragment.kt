@@ -34,6 +34,7 @@ class HomeFragment : Fragment() {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+
         handleAddButton()
         handleSwipeRefresh()
 

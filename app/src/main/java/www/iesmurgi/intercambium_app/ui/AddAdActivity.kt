@@ -67,7 +67,7 @@ class AddAdActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menu?.findItem(R.id.item_save)?.apply {
-            setTitle("R.string.save")
+            setTitle(R.string.save)
             setIcon(R.drawable.ic_baseline_done_24)
         }
 
