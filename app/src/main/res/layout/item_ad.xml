@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="24dp"
@@ -9,6 +10,7 @@
     android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
+        android:id="@+id/cv_ad_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -54,7 +56,8 @@
                 android:textColor="@color/black"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:text="Person Name"/>
+                android:text="Person Name"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
 
@@ -64,15 +67,32 @@
             android:layout_marginTop="12dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tv_item_ad_title"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:text="Title"/>
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/iv_ad_hidden"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_hidden_24"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/tv_item_ad_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:text="Title"
+                    tools:ignore="HardcodedText" />
+
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/tv_item_ad_description"
@@ -83,39 +103,10 @@
                 android:textColor="@color/dimgray"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:text="Description"/>
+                android:text="Description"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
-
-<!--        <LinearLayout-->
-<!--            android:id="@+id/ll_buttons"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="48dp"-->
-<!--            android:layout_marginTop="16dp"-->
-<!--            android:orientation="horizontal"-->
-<!--            android:gravity="center">-->
-
-<!--            <ImageButton-->
-<!--                android:id="@+id/ib_edit_travel"-->
-<!--                android:layout_width="32dp"-->
-<!--                android:layout_height="32dp"-->
-<!--                android:layout_marginEnd="4dp"-->
-<!--                android:background="@drawable/ic_baseline_edit_32"-->
-<!--                android:contentDescription="Editar anuncio"-->
-<!--                android:foreground="?attr/selectableItemBackground"-->
-<!--                tools:ignore="TouchTargetSizeCheck" />-->
-
-<!--            <ImageButton-->
-<!--                android:id="@+id/ib_delete_travel"-->
-<!--                android:layout_width="32dp"-->
-<!--                android:layout_height="32dp"-->
-<!--                android:layout_marginStart="4dp"-->
-<!--                android:background="@drawable/ic_baseline_delete_32"-->
-<!--                android:contentDescription="Eliminar anuncio"-->
-<!--                android:foreground="?attr/selectableItemBackground"-->
-<!--                tools:ignore="TouchTargetSizeCheck" />-->
-
-<!--        </LinearLayout>-->
 
     </LinearLayout>
 

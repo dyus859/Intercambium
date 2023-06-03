@@ -7,8 +7,9 @@ import www.iesmurgi.intercambium_app.utils.Constants
 
 class DbUtils {
     companion object {
-        private fun getDefaultUserData(): MutableMap<String, String> {
+        private fun getDefaultUserData(): MutableMap<String, Any> {
             return hashMapOf(
+                "administrator" to false,
                 "name" to "",
                 "phoneNumber" to "",
                 "photoUrl" to "",
@@ -23,7 +24,7 @@ class DbUtils {
             val email = response.email.toString()
 
             // If name is not specified, then take first part of the email
-            if (data["name"]?.isEmpty() != false) {
+            if ((data["name"] as String).isEmpty()) {
                 data["name"] = email.substringBefore("@")
             }
 
@@ -37,7 +38,7 @@ class DbUtils {
             createNewUserDocument(email, data)
         }
 
-        private fun createNewUserDocument(email: String, data: MutableMap<String, String>) {
+        private fun createNewUserDocument(email: String, data: MutableMap<String, Any>) {
             println("DOCUMENT: ${email}, data: ${data}")
             val db = Firebase.firestore
             db.collection(Constants.COLLECTION_USERS)

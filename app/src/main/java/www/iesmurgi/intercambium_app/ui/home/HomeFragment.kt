@@ -96,10 +96,9 @@ class HomeFragment : Fragment() {
 
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
-        adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.ASCENDING)
+        adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
             .get()
             .addOnFailureListener {
-                binding.pbHome.hide()
                 handleNoAdsMsg()
             }
             .addOnSuccessListener { adDocuments ->
@@ -117,36 +116,51 @@ class HomeFragment : Fragment() {
                     val usersDocument = usersCollection.document(author)
                     usersDocument.get()
                         .addOnSuccessListener { userDocument ->
-                            val userEmail = userDocument.id
-                            val userName = userDocument.getString(Constants.USERS_FIELD_NAME).toString()
-                            val userPhoneNumber = userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
-                            val userPhotoUrl = userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
+                            // If this account doesn't exist anymore, don't show the ad
+                            if (userDocument.exists()) {
+                                val userEmail = userDocument.id
+                                val userName =
+                                    userDocument.getString(Constants.USERS_FIELD_NAME).toString()
+                                val userPhoneNumber =
+                                    userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
+                                val userPhotoUrl =
+                                    userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
 
-                            val adId = adDocument.id
-                            val adTitle = adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
-                            val adDesc = adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
-                            var adCreatedAt = adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
-                            val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
+                                val adId = adDocument.id
+                                val adTitle =
+                                    adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
+                                val adDesc =
+                                    adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
+                                val adProvince =
+                                    adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
+                                val adStatus =
+                                    adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
+                                var adCreatedAt =
+                                    adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
+                                val adImgUrl =
+                                    adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
 
-                            if (adCreatedAt == null) {
-                                adCreatedAt = Timestamp.now()
+                                if (adCreatedAt == null) {
+                                    adCreatedAt = Timestamp.now()
+                                }
+
+                                val user = User(userEmail, userName, userPhoneNumber, userPhotoUrl)
+                                val ad =
+                                    Ad(adId, adTitle, adDesc, adProvince, adStatus,
+                                        adCreatedAt, adImgUrl, user)
+                                ad.visible = Utils.isAdVisibleForUser(ad)
+
+                                // Add the add to the list
+                                adapter.notifyItemInserted(adapter.adList.size)
+                                adapter.adList.add(ad)
                             }
 
-                            val user = User(userEmail, userName, userPhoneNumber, userPhotoUrl)
-                            val ad = Ad(adId, adTitle, adDesc, adCreatedAt, adImgUrl, user)
-
-                            // Add the add to the list
-                            adapter.notifyItemInserted(adapter.adList.size)
-                            adapter.adList.add(ad)
-
-                            binding.pbHome.hide()
                             handleNoAdsMsg()
                         }
                 }
 
                 // There are no ads in the database
                 if (adDocuments.size() == 0) {
-                    binding.pbHome.hide()
                     handleNoAdsMsg()
                 }
             }
@@ -154,8 +168,10 @@ class HomeFragment : Fragment() {
 
     private fun handleNoAdsMsg() {
         binding.swipeRefreshLayoutHome.isRefreshing = false
+        binding.pbHome.hide()
 
-        if (adapter.adList.size == 0) {
+        println(adapter.getVisibleAdsCount())
+        if (adapter.adList.size == 0 || adapter.getVisibleAdsCount() == 0) {
             binding.tvNoAdsHome.visibility = View.VISIBLE
         } else {
             binding.tvNoAdsHome.visibility = View.GONE

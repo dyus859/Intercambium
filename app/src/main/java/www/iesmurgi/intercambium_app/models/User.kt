@@ -4,14 +4,16 @@ data class User(
     val email: String = "",
     val name: String = "",
     val phoneNumber: String = "",
-    val photoUrl: String = ""
+    val photoUrl: String = "",
+    val administrator: Boolean = false,
 ) : java.io.Serializable {
 
     constructor(other: User) : this(
         email = other.email,
         name = other.name,
         phoneNumber = other.phoneNumber,
-        photoUrl = other.photoUrl
+        photoUrl = other.photoUrl,
+        administrator = other.administrator,
     )
 
 }

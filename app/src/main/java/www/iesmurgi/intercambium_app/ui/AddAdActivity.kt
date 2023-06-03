@@ -16,7 +16,9 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityAddEditAdBinding
 import www.iesmurgi.intercambium_app.databinding.EditImageBinding
 import www.iesmurgi.intercambium_app.models.Ad
+import www.iesmurgi.intercambium_app.models.Province
 import www.iesmurgi.intercambium_app.models.User
+import www.iesmurgi.intercambium_app.models.adapters.ProvinceAdapter
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
 import www.iesmurgi.intercambium_app.utils.Utils
@@ -24,6 +26,7 @@ import www.iesmurgi.intercambium_app.utils.Utils
 class AddAdActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddEditAdBinding
 
+    private var selectedProvinceName: String = ""
     private var latestImgUri: Uri? = null
     private val previewImage by lazy { binding.ivImageAdd }
 
@@ -58,6 +61,7 @@ class AddAdActivity : AppCompatActivity() {
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
         setListeners()
+        setProvincesList()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -92,6 +96,14 @@ class AddAdActivity : AppCompatActivity() {
         // When users click on 'Edit image'
         binding.ibEdit.setOnClickListener {
             editImageOnClick()
+        }
+    }
+
+    private fun setProvincesList() {
+        binding.mactAdProvince.setAdapter(ProvinceAdapter(this, Province.provinceSource))
+        binding.mactAdProvince.setOnItemClickListener { parent, _, position, _ ->
+            val province = parent.adapter.getItem(position) as Province
+            selectedProvinceName = province.name
         }
     }
 
@@ -148,9 +160,15 @@ class AddAdActivity : AppCompatActivity() {
             return
         }
 
+        if (selectedProvinceName.isEmpty()) {
+            binding.mactAdProvince.error = getString(R.string.required)
+            binding.mactAdProvince.requestFocus()
+            return
+        }
+
         canSave = false
 
-        val ad = Ad("", title, description)
+        val ad = Ad("", title, description, selectedProvinceName, Constants.AD_STATUS_REVISION)
         ad.author = User(SharedData.getUser().value!!)
 
         // If there is an image, first need to upload it

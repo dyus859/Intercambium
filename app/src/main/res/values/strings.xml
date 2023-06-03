@@ -3,6 +3,10 @@
     <string name="title_home">Inicio</string>
     <string name="title_notifications">Buzón</string>
     <string name="title_profile">Perfil</string>
+    <string name="hint_title">Título</string>
+    <string name="hint_description">Descripción</string>
+    <string name="hint_province">Provincia</string>
+    <string name="hint_edit_image">Editar imagen</string>
     <string name="menu_sign_out">Cerrar sesión</string>
     <string name="menu_sign_out_title">¿Seguro que deseas cerrar sesión?</string>
     <string name="signed_out">Has cerrado la sesión</string>

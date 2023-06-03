@@ -56,11 +56,17 @@ class MainActivity : AppCompatActivity() {
                 val userDocument = usersCollection.document(email)
                 userDocument.get()
                     .addOnSuccessListener { document ->
+                        var administrator = document.getBoolean(Constants.USERS_FIELD_ADMINISTRATOR)
+                        if (administrator == null) {
+                            administrator = false
+                        }
+
                         SharedData.setUser(User(
                             email,
                             document.getString(Constants.USERS_FIELD_NAME).toString(),
                             document.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString(),
-                            document.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
+                            document.getString(Constants.USERS_FIELD_PHOTO_URL).toString(),
+                            administrator
                         ))
                     }
             } else {

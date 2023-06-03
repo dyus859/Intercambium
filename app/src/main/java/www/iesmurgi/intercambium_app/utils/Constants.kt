@@ -8,6 +8,8 @@ object Constants {
     const val ADS_FIELD_AUTHOR = "author"
     const val ADS_FIELD_TITLE = "title"
     const val ADS_FIELD_DESCRIPTION = "description"
+    const val ADS_FIELD_PROVINCE = "province"
+    const val ADS_FIELD_STATUS = "status"
     const val ADS_FIELD_CREATED_AT = "createdAt"
     const val ADS_FIELD_IMAGE = "img"
 
@@ -22,6 +24,7 @@ object Constants {
     const val USERS_FIELD_NAME = "name"
     const val USERS_FIELD_PHONE_NUMBER = "phoneNumber"
     const val USERS_FIELD_PHOTO_URL = "photoUrl"
+    const val USERS_FIELD_ADMINISTRATOR = "administrator"
 
     /************************************************************
      ************************************************************
@@ -42,4 +45,12 @@ object Constants {
 
     // Minimum length of the password to sign up
     const val MIN_PASSWORD_LENGTH = 6
+
+    /************************************************************
+     ************************************************************
+     ************************************************************/
+
+    const val AD_STATUS_REVISION = "in_revision"
+    const val AD_STATUS_PUBLISHED = "published"
+    const val AD_STATUS_HIDDEN = "hidden"
 }
