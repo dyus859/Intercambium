@@ -42,6 +42,11 @@ class LoginEmailActivity : AppCompatActivity() {
         signUpButton.setOnClickListener {
             tryActionButton(false)
         }
+
+        val forgotYourPassword = binding.tvForgotYourPasswordLogin
+        forgotYourPassword.setOnClickListener {
+            tryResetPassword()
+        }
     }
 
     private fun tryActionButton(signIn: Boolean) {
@@ -112,5 +117,23 @@ class LoginEmailActivity : AppCompatActivity() {
                     finish()
                 }
             }
+    }
+
+    private fun tryResetPassword() {
+        val email = binding.tieEmailLogin.text.toString()
+        val required = getString(R.string.required)
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}".toRegex()
+
+        if (email.isEmpty()) {
+            binding.tieEmailLogin.error = required
+        } else if (!email.matches(emailPattern)) {
+            val invalidEmailMsg = getString(R.string.auth_invalid_email_pattern)
+            binding.tieEmailLogin.error = invalidEmailMsg
+        } else {
+            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+
+            val text = getString(R.string.reset_password_link_sent)
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+        }
     }
 }

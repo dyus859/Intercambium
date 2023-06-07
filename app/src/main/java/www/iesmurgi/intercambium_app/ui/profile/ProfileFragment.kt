@@ -18,6 +18,7 @@ import www.iesmurgi.intercambium_app.databinding.DialogSignOutBinding
 import www.iesmurgi.intercambium_app.databinding.FragmentProfileBinding
 import www.iesmurgi.intercambium_app.db.DbUtils
 import www.iesmurgi.intercambium_app.ui.LoginEmailActivity
+import www.iesmurgi.intercambium_app.ui.MyAdsActivity
 import www.iesmurgi.intercambium_app.utils.Utils
 
 class ProfileFragment : Fragment() {
@@ -63,6 +64,11 @@ class ProfileFragment : Fragment() {
         signInGoogleBtn.setOnClickListener {
             signInWithGoogle(signInGoogleLauncher)
         }
+
+        val myAdsBtn: Button = binding.btnMyAdsProfile
+        myAdsBtn.setOnClickListener {
+            goToMyAds()
+        }
     }
 
     private fun setUserAuthenticated(authenticated: Boolean) {
@@ -70,6 +76,8 @@ class ProfileFragment : Fragment() {
             binding.sivLogoProfile to false,
             binding.signInEmail to false,
             binding.signInGoogle to false,
+            binding.btnMyAdsProfile to true,
+            binding.btnConfigurationProfile to true,
         )
 
         map.forEach { (key, value) ->
@@ -155,5 +163,11 @@ class ProfileFragment : Fragment() {
             showLogoutMessage = true
             FirebaseAuth.getInstance().signOut()
         }
+    }
+
+    // A method that is used to open a new activity (My Ads)
+    private fun goToMyAds() {
+        val intent = Intent(activity?.applicationContext, MyAdsActivity::class.java)
+        startActivity(intent)
     }
 }

@@ -23,10 +23,17 @@
     <string name="email_hint">Email</string>
     <string name="password_hint">Contraseña</string>
     <string name="forgot_your_password">¿Olvidaste tu contraseña?</string>
+    <string name="reset_password_link_sent">Se ha enviado un enlace para restablecer la contraseña al email indicado</string>
     <string name="required">Obligatorio</string>
     <string name="sign_in_successful">Has iniciado la sesión</string>
     <string name="sign_in_unsuccessful">No se ha podido iniciar sesión, compruebe los datos</string>
     <string name="auth_invalid_email_pattern">Formato del email no válido</string>
     <string name="auth_user_collision_exception">Este correo electrónico ya está registrado</string>
     <string name="auth_weak_password_exception">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="my_ads_profile">Mis anuncios</string>
+    <string name="configuration_profile">Configuración</string>
+    <string name="publish_ad">Publicar anuncio</string>
+    <string name="no_ads">No hay anuncios</string>
+    <string name="open_chat">Abrir chat</string>
+    <string name="ad_does_not_exist_anymore">Este anuncio no está disponible</string>
 </resources>

@@ -13,6 +13,23 @@
         android:theme="@style/Theme.Intercambium"
         tools:targetApi="31">
         <activity
+            android:name=".ui.MyAdsActivity"
+            android:exported="false"
+            android:label="@string/my_ads_profile"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".ui.AdActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".ui.LoginEmailActivity"
             android:exported="false"
             android:parentActivityName=".ui.MainActivity">
@@ -23,7 +40,7 @@
         <activity
             android:name=".ui.AddAdActivity"
             android:exported="false"
-            android:label="Publicar anuncio"
+            android:label="@string/publish_ad"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.app.lib_name"

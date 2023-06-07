@@ -17,6 +17,7 @@ import www.iesmurgi.intercambium_app.databinding.FragmentHomeBinding
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.models.adapters.AdAdapter
+import www.iesmurgi.intercambium_app.ui.AdActivity
 import www.iesmurgi.intercambium_app.ui.AddAdActivity
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.Utils
@@ -33,7 +34,6 @@ class HomeFragment : Fragment() {
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
 
         handleAddButton()
         handleSwipeRefresh()
@@ -84,11 +84,15 @@ class HomeFragment : Fragment() {
     }
 
     private fun onItemClick(ad: Ad) {
-        // User is not authorized, so open the profile to authorize
+        // If user is not authorized, open the profile fragment to authorize
         if (FirebaseAuth.getInstance().currentUser == null) {
             Utils.navigateToFragment(view, R.id.navigation_profile)
             return
         }
+
+        val intent = Intent(activity?.applicationContext, AdActivity::class.java)
+        intent.putExtra("AD", ad.id)
+        startActivity(intent)
     }
 
     private fun loadAdsFromDB() {

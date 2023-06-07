@@ -39,7 +39,6 @@ class DbUtils {
         }
 
         private fun createNewUserDocument(email: String, data: MutableMap<String, Any>) {
-            println("DOCUMENT: ${email}, data: ${data}")
             val db = Firebase.firestore
             db.collection(Constants.COLLECTION_USERS)
                 .document(email)
