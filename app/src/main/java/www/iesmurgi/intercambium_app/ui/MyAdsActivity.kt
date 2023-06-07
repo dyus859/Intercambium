@@ -1,5 +1,6 @@
 package www.iesmurgi.intercambium_app.ui
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -62,7 +63,7 @@ class MyAdsActivity : AppCompatActivity() {
     private fun onItemClick(ad: Ad) {
         // If user is not authorized, open the profile fragment to authorize
         if (FirebaseAuth.getInstance().currentUser == null) {
-            finish()
+            finishMyAdsActivity()
             return
         }
 
@@ -75,7 +76,6 @@ class MyAdsActivity : AppCompatActivity() {
         // Show ProgressBar
         binding.pbMyAds.show()
 
-        println(user.email)
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
         adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
@@ -137,5 +137,11 @@ class MyAdsActivity : AppCompatActivity() {
         } else {
             binding.tvNoAdsMyAds.visibility = View.GONE
         }
+    }
+
+    private fun finishMyAdsActivity() {
+        val intent = Intent()
+        setResult(Activity.RESULT_OK, intent)
+        finish()
     }
 }

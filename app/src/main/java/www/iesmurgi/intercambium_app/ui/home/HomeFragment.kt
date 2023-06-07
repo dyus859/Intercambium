@@ -69,15 +69,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun recyclerView() {
+        val context = requireContext()
+
         if (!this::adapter.isInitialized) {
-            adapter = AdAdapter(activity?.applicationContext!!) { onItemClick(it) }
+            adapter = AdAdapter(context) { onItemClick(it) }
             binding.rvAdsHome.adapter = adapter
-            binding.rvAdsHome.layoutManager = LinearLayoutManager(activity?.applicationContext)
+            binding.rvAdsHome.layoutManager = LinearLayoutManager(context)
         } else {
             // Avoid "E/RecyclerView: No adapter attached; skipping layout"
             binding.rvAdsHome.adapter = adapter
             // Avoid "E/RecyclerView: No layout manager attached; skipping layout"
-            binding.rvAdsHome.layoutManager = LinearLayoutManager(activity?.applicationContext)
+            binding.rvAdsHome.layoutManager = LinearLayoutManager(context)
         }
 
         loadAdsFromDB()
@@ -90,7 +92,7 @@ class HomeFragment : Fragment() {
             return
         }
 
-        val intent = Intent(activity?.applicationContext, AdActivity::class.java)
+        val intent = Intent(requireContext(), AdActivity::class.java)
         intent.putExtra("AD", ad.id)
         startActivity(intent)
     }

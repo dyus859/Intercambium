@@ -8,6 +8,7 @@ import android.view.*
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -24,6 +25,7 @@ import www.iesmurgi.intercambium_app.utils.Utils
 class ProfileFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileBinding
+    private lateinit var activityLauncher: ActivityResultLauncher<Intent>
 
     private val signInGoogleLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -41,6 +43,16 @@ class ProfileFragment : Fragment() {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // Navigate back to the Profile Fragment
+                val fragmentManager = requireActivity().supportFragmentManager
+                val transaction = fragmentManager.beginTransaction()
+                transaction.replace(R.id.navigation_profile, ProfileFragment())
+                transaction.commit()
+            }
+        }
+
         createListeners()
 
         // Enable options menu
@@ -57,7 +69,7 @@ class ProfileFragment : Fragment() {
 
         val signInEmailBtn: Button = binding.signInEmail
         signInEmailBtn.setOnClickListener {
-            signInWithEmail()
+            openLoginEmailActivity()
         }
 
         val signInGoogleBtn: Button = binding.signInGoogle
@@ -67,7 +79,7 @@ class ProfileFragment : Fragment() {
 
         val myAdsBtn: Button = binding.btnMyAdsProfile
         myAdsBtn.setOnClickListener {
-            goToMyAds()
+            openMyAdsActivity()
         }
     }
 
@@ -98,9 +110,9 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun signInWithEmail() {
-        val intent = Intent(activity?.applicationContext, LoginEmailActivity::class.java)
-        startActivity(intent)
+    private fun openLoginEmailActivity() {
+        val intent = Intent(requireContext(), LoginEmailActivity::class.java)
+        activityLauncher.launch(intent)
     }
 
     private fun signInWithGoogle(signInLauncher: ActivityResultLauncher<Intent>) {
@@ -166,8 +178,8 @@ class ProfileFragment : Fragment() {
     }
 
     // A method that is used to open a new activity (My Ads)
-    private fun goToMyAds() {
-        val intent = Intent(activity?.applicationContext, MyAdsActivity::class.java)
-        startActivity(intent)
+    private fun openMyAdsActivity() {
+        val intent = Intent(requireContext(), MyAdsActivity::class.java)
+        activityLauncher.launch(intent)
     }
 }

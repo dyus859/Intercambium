@@ -1,5 +1,7 @@
 package www.iesmurgi.intercambium_app.ui
 
+import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -89,7 +91,7 @@ class LoginEmailActivity : AppCompatActivity() {
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
                 if (task.isSuccessful) {
-                    finish()
+                    finishLoginActivity()
                 }
             }
     }
@@ -114,7 +116,7 @@ class LoginEmailActivity : AppCompatActivity() {
 
                 if (task.isSuccessful) {
                     DbUtils.createNewUserWithEmail(email)
-                    finish()
+                    finishLoginActivity()
                 }
             }
     }
@@ -135,5 +137,11 @@ class LoginEmailActivity : AppCompatActivity() {
             val text = getString(R.string.reset_password_link_sent)
             Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    fun finishLoginActivity() {
+        val intent = Intent()
+        setResult(Activity.RESULT_OK, intent)
+        finish()
     }
 }
