@@ -9,23 +9,24 @@ class DbUtils {
     companion object {
         private fun getDefaultUserData(): MutableMap<String, Any> {
             return hashMapOf(
-                "administrator" to false,
-                "name" to "",
-                "phoneNumber" to "",
-                "photoUrl" to "",
+                Constants.USERS_FIELD_ADMINISTRATOR to false,
+                Constants.USERS_FIELD_NAME to "",
+                Constants.USERS_FIELD_AGE to 0,
+                Constants.USERS_FIELD_PHONE_NUMBER to "",
+                Constants.USERS_FIELD_PHOTO_URL to "",
             )
         }
 
         fun createNewUserWithGoogle(response: IdpResponse) {
             val data = getDefaultUserData()
-            data["name"] = response.user.name ?: ""
-            data["photoNumber"] = response.phoneNumber ?: ""
-            data["photoUrl"] = (response.user.photoUri ?: "") as String
+            data[Constants.USERS_FIELD_NAME] = response.user.name ?: ""
+            data[Constants.USERS_FIELD_PHONE_NUMBER] = response.phoneNumber ?: ""
+            data[Constants.USERS_FIELD_PHOTO_URL] = (response.user.photoUri ?: "") as String
             val email = response.email.toString()
 
             // If name is not specified, then take first part of the email
-            if ((data["name"] as String).isEmpty()) {
-                data["name"] = email.substringBefore("@")
+            if ((data[Constants.USERS_FIELD_NAME] as String).isEmpty()) {
+                data[Constants.USERS_FIELD_NAME] = email.substringBefore("@")
             }
 
             createNewUserDocument(email, data)
@@ -33,7 +34,7 @@ class DbUtils {
 
         fun createNewUserWithEmail(email: String) {
             val data = getDefaultUserData()
-            data["name"] = email.substringBefore("@")
+            data[Constants.USERS_FIELD_NAME] = email.substringBefore("@")
 
             createNewUserDocument(email, data)
         }

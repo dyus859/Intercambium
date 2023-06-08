@@ -29,6 +29,9 @@ class MyAdsActivity : AppCompatActivity() {
         binding = ActivityMyAdsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Return to the previous activity
+        actionBar?.setDisplayHomeAsUpEnabled(true)
+
         user = SharedData.getUser().value!!
         handleSwipeRefresh()
     }

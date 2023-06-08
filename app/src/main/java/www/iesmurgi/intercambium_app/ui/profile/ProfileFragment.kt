@@ -18,6 +18,7 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.DialogSignOutBinding
 import www.iesmurgi.intercambium_app.databinding.FragmentProfileBinding
 import www.iesmurgi.intercambium_app.db.DbUtils
+import www.iesmurgi.intercambium_app.ui.ConfigurationActivity
 import www.iesmurgi.intercambium_app.ui.LoginEmailActivity
 import www.iesmurgi.intercambium_app.ui.MyAdsActivity
 import www.iesmurgi.intercambium_app.utils.Utils
@@ -81,11 +82,15 @@ class ProfileFragment : Fragment() {
         myAdsBtn.setOnClickListener {
             openMyAdsActivity()
         }
+
+        val configurationBtn: Button = binding.btnConfigurationProfile
+        configurationBtn.setOnClickListener {
+            openConfigurationActivity()
+        }
     }
 
     private fun setUserAuthenticated(authenticated: Boolean) {
         val map = mutableMapOf(
-            binding.sivLogoProfile to false,
             binding.signInEmail to false,
             binding.signInGoogle to false,
             binding.btnMyAdsProfile to true,
@@ -180,6 +185,12 @@ class ProfileFragment : Fragment() {
     // A method that is used to open a new activity (My Ads)
     private fun openMyAdsActivity() {
         val intent = Intent(requireContext(), MyAdsActivity::class.java)
+        activityLauncher.launch(intent)
+    }
+
+    // A method that is used to open a new activity (Configuration)
+    private fun openConfigurationActivity() {
+        val intent = Intent(requireContext(), ConfigurationActivity::class.java)
         activityLauncher.launch(intent)
     }
 }

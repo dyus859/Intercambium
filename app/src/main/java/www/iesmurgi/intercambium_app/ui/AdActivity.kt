@@ -57,6 +57,8 @@ class AdActivity : AppCompatActivity() {
                                     val userEmail = userDocument.id
                                     val userName =
                                         userDocument.getString(Constants.USERS_FIELD_NAME).toString()
+                                    val userAge =
+                                        userDocument.getLong(Constants.USERS_FIELD_AGE)
                                     val userPhoneNumber =
                                         userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
                                     val userPhotoUrl =
@@ -80,7 +82,7 @@ class AdActivity : AppCompatActivity() {
                                         adCreatedAt = Timestamp.now()
                                     }
 
-                                    val user = User(userEmail, userName, userPhoneNumber, userPhotoUrl)
+                                    val user = User(userEmail, userName, userAge, userPhoneNumber, userPhotoUrl)
                                     val ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt,
                                         adImgUrl, user)
 

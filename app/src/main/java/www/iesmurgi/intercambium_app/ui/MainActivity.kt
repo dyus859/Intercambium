@@ -44,6 +44,11 @@ class MainActivity : AppCompatActivity() {
         setFirebaseAuthListener()
     }
 
+    override fun onResume() {
+        super.onResume()
+        println(intent.extras)
+    }
+
     private fun setFirebaseAuthListener() {
         val auth = FirebaseAuth.getInstance()
         val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
@@ -61,9 +66,12 @@ class MainActivity : AppCompatActivity() {
                             administrator = false
                         }
 
+                        val age = document.getLong(Constants.USERS_FIELD_AGE)
+
                         SharedData.setUser(User(
                             email,
                             document.getString(Constants.USERS_FIELD_NAME).toString(),
+                            age,
                             document.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString(),
                             document.getString(Constants.USERS_FIELD_PHOTO_URL).toString(),
                             administrator

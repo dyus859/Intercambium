@@ -36,4 +36,16 @@
     <string name="no_ads">No hay anuncios</string>
     <string name="open_chat">Abrir chat</string>
     <string name="ad_does_not_exist_anymore">Este anuncio no está disponible</string>
+    <string name="delete_my_account">Eliminar mi cuenta</string>
+    <string name="dialog_delete_account_title">¿Seguro que quieres eliminar tu cuenta?</string>
+    <string name="dialog_edit_password_title">Cambiar contraseña</string>
+    <string name="dialog_edit_name_title">Cambiar nombre</string>
+    <string name="dialog_edit_age">Cambiar edad</string>
+    <string name="dialog_edit_name_hint">Introduce nuevo nombre</string>
+    <string name="password_changed_successfully">La contraseña se ha cambiado con éxito.</string>
+    <string name="value_not_set_configuration">—</string>
+    <string name="label_email_configuration">Correo electrónico: %1$s</string>
+    <string name="label_password_configuration">Contraseña: ••••••••</string>
+    <string name="label_name_configuration">Nombre: %1$s</string>
+    <string name="label_age_configuration">Edad: %1$s</string>
 </resources>

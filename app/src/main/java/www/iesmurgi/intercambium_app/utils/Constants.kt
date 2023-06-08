@@ -22,6 +22,7 @@ object Constants {
 
     // 'users' document fields
     const val USERS_FIELD_NAME = "name"
+    const val USERS_FIELD_AGE = "age"
     const val USERS_FIELD_PHONE_NUMBER = "phoneNumber"
     const val USERS_FIELD_PHOTO_URL = "photoUrl"
     const val USERS_FIELD_ADMINISTRATOR = "administrator"

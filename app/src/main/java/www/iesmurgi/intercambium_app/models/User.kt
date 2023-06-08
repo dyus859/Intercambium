@@ -2,7 +2,8 @@ package www.iesmurgi.intercambium_app.models
 
 data class User(
     val email: String = "",
-    val name: String = "",
+    var name: String = "",
+    var age: Long? = null,
     val phoneNumber: String = "",
     val photoUrl: String = "",
     val administrator: Boolean = false,
