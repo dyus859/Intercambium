@@ -47,10 +47,8 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".ui.AddAdActivity"
-            android:exported="false"
-            android:label="@string/publish_ad"
-            android:parentActivityName=".ui.MainActivity">
+            android:name=".ui.AddEditAdActivity"
+            android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

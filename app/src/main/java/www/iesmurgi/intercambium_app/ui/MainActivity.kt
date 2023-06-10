@@ -16,10 +16,21 @@ import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
 
+/**
+ * The main activity of the application.
+ *
+ * @author Denis Yushkin
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    /**
+     * Called when the activity is starting.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being
+     *     shut down, this Bundle contains the data it most recently supplied.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,11 +55,16 @@ class MainActivity : AppCompatActivity() {
         setFirebaseAuthListener()
     }
 
+    /**
+     * Called when the activity is resumed.
+     */
     override fun onResume() {
         super.onResume()
-        println(intent.extras)
     }
 
+    /**
+     * Sets the Firebase authentication state listener to listen for changes in the user's authentication state.
+     */
     private fun setFirebaseAuthListener() {
         val auth = FirebaseAuth.getInstance()
         val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->

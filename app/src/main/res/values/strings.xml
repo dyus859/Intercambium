@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Intercambium</string>
+    <string name="add_edit_ad_parent_activity_name" translatable="false" />
     <string name="title_home">Inicio</string>
     <string name="title_notifications">Buzón</string>
     <string name="title_profile">Perfil</string>
@@ -8,22 +9,25 @@
     <string name="hint_province">Provincia</string>
     <string name="hint_edit_image">Editar imagen</string>
     <string name="menu_sign_out">Cerrar sesión</string>
-    <string name="menu_sign_out_title">¿Seguro que deseas cerrar sesión?</string>
+    <string name="menu_sign_out_title">¿Quiere cerrar sesión?</string>
     <string name="signed_out">Has cerrado la sesión</string>
     <string name="edit_image_gallery">Galería</string>
     <string name="edit_image_photo">Foto</string>
-    <string name="edit_image_title">Selecciona una opción para añadir imagen</string>
+    <string name="edit_image_title">Elija una opción para añadir la imagen</string>
     <string name="save">Guardar</string>
-    <string name="error_title_min_length">El título es demasiado corto</string>
-    <string name="error_desc_min_length">La descripción es demasiado corta</string>
+    <string name="error_title_min_length">El título es demasiado corto (mín. %1$d caracteres)</string>
+    <string name="error_title_max_length">El título es demasiado largo (%1$d caracteres de %2$d)</string>
+    <string name="error_desc_min_length">La descripción es demasiado corta (mín. %1$d caracteres)</string>
+    <string name="error_desc_max_length">La descripción es demasiado larga (%1$d caracteres de %2$d)</string>
+    <string name="error_invalid_province_name">El nombre es inválido</string>
     <string name="sign_in_with_email">Continuar con Email</string>
     <string name="sign_in_with_google">Continuar con Google</string>
     <string name="sign_in">Iniciar sesión</string>
     <string name="sign_up">Registrarse con esos datos</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Contraseña</string>
-    <string name="forgot_your_password">¿Olvidaste tu contraseña?</string>
-    <string name="reset_password_link_sent">Se ha enviado un enlace para restablecer la contraseña al email indicado</string>
+    <string name="forgot_your_password">¿Olvidó su contraseña?</string>
+    <string name="reset_password_link_sent">Se ha enviado un enlace para restablecer la contraseña al email indicado.</string>
     <string name="required">Obligatorio</string>
     <string name="sign_in_successful">Has iniciado la sesión</string>
     <string name="sign_in_unsuccessful">No se ha podido iniciar sesión, compruebe los datos</string>
@@ -33,11 +37,15 @@
     <string name="my_ads_profile">Mis anuncios</string>
     <string name="configuration_profile">Configuración</string>
     <string name="publish_ad">Publicar anuncio</string>
+    <string name="edit_ad">Publicar anuncio</string>
     <string name="no_ads">No hay anuncios</string>
+    <string name="action_publish_ad">Publicar</string>
+    <string name="action_hide_ad">Ocultar</string>
+    <string name="action_delete_ad">Borrar</string>
     <string name="open_chat">Abrir chat</string>
-    <string name="ad_does_not_exist_anymore">Este anuncio no está disponible</string>
+    <string name="ad_could_not_be_loaded">Este anuncio no está disponible</string>
     <string name="delete_my_account">Eliminar mi cuenta</string>
-    <string name="dialog_delete_account_title">¿Seguro que quieres eliminar tu cuenta?</string>
+    <string name="dialog_delete_account_title">¿Quiere eliminar su cuenta?</string>
     <string name="dialog_edit_password_title">Cambiar contraseña</string>
     <string name="dialog_edit_name_title">Cambiar nombre</string>
     <string name="dialog_edit_age">Cambiar edad</string>
@@ -48,4 +56,11 @@
     <string name="label_password_configuration">Contraseña: ••••••••</string>
     <string name="label_name_configuration">Nombre: %1$s</string>
     <string name="label_age_configuration">Edad: %1$s</string>
+    <string name="dialog_publish_ad">¿Quiere publicar el anuncio?</string>
+    <string name="dialog_hide_ad">¿Quiere ocultar el anuncio?</string>
+    <string name="dialog_delete_ad">¿Quiere borrar el anuncio?</string>
+    <string name="status_successfully_updated">El estado del anuncio se ha actualizado correctamente.</string>
+    <string name="error_operation_could_not_be_done">No se ha podido realizar la operación.</string>
+    <string name="ad_successfully_edited">El anuncio se ha editado con éxito.</string>
+    <string name="ad_successfully_deleted">El anuncio se ha borrado con éxito.</string>
 </resources>

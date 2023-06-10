@@ -4,38 +4,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/tv_choose_from_gallery"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
+        android:gravity="center"
+        android:padding="24dp"
         android:text="@string/edit_image_gallery"
-        android:textSize="17sp"
         android:textColor="@color/black"
-        android:gravity="center_vertical"
-        android:padding="16dp"
-        android:drawablePadding="16dp"
-        app:drawableStartCompat="@drawable/gallery"
+        android:textSize="17sp"
+        app:drawableStartCompat="@drawable/ic_baseline_gallery_24"
         tools:ignore="UnusedAttribute" />
 
     <TextView
         android:id="@+id/tv_take_a_photo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
+        android:gravity="center"
+        android:padding="24dp"
         android:text="@string/edit_image_photo"
-        android:textSize="17sp"
         android:textColor="@color/black"
-        android:gravity="center_vertical"
-        android:padding="16dp"
-        android:drawablePadding="16dp"
-        app:drawableStartCompat="@drawable/camera"
+        android:textSize="17sp"
+        app:drawableStartCompat="@drawable/ic_baseline_photo_camera_24"
         tools:ignore="UnusedAttribute" />
 
 </LinearLayout>

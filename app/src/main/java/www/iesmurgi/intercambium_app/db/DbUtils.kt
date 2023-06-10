@@ -5,8 +5,18 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.utils.Constants
 
+/**
+ * Utility class for database operations.
+ *
+ * @author Denis Yushkin
+ */
 class DbUtils {
     companion object {
+        /**
+         * Retrieves the default user data.
+         *
+         * @return A mutable map containing the default user data.
+         */
         private fun getDefaultUserData(): MutableMap<String, Any> {
             return hashMapOf(
                 Constants.USERS_FIELD_ADMINISTRATOR to false,
@@ -17,6 +27,11 @@ class DbUtils {
             )
         }
 
+        /**
+         * Creates a new user with Google authentication.
+         *
+         * @param response The [IdpResponse] object containing the authentication response.
+         */
         fun createNewUserWithGoogle(response: IdpResponse) {
             val data = getDefaultUserData()
             data[Constants.USERS_FIELD_NAME] = response.user.name ?: ""
@@ -32,6 +47,11 @@ class DbUtils {
             createNewUserDocument(email, data)
         }
 
+        /**
+         * Creates a new user with email authentication.
+         *
+         * @param email The email address of the user.
+         */
         fun createNewUserWithEmail(email: String) {
             val data = getDefaultUserData()
             data[Constants.USERS_FIELD_NAME] = email.substringBefore("@")
@@ -39,6 +59,12 @@ class DbUtils {
             createNewUserDocument(email, data)
         }
 
+        /**
+         * Creates a new user document in the database.
+         *
+         * @param email The email address of the user.
+         * @param data A mutable map containing the user data.
+         */
         private fun createNewUserDocument(email: String, data: MutableMap<String, Any>) {
             val db = Firebase.firestore
             db.collection(Constants.COLLECTION_USERS)

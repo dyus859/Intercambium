@@ -1,7 +1,5 @@
 package www.iesmurgi.intercambium_app.ui
 
-import android.app.Activity
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -12,10 +10,21 @@ import www.iesmurgi.intercambium_app.databinding.ActivityLoginEmailBinding
 import www.iesmurgi.intercambium_app.db.DbUtils
 import www.iesmurgi.intercambium_app.utils.Constants
 
+/**
+ * Activity for email-based login and registration.
+ *
+ * @author Denis Yushkin
+ */
 class LoginEmailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginEmailBinding
     private var modeSignIn = true
 
+    /**
+     * Called when the activity is starting.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being
+     *     shut down, this Bundle contains the data it most recently supplied.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginEmailBinding.inflate(layoutInflater)
@@ -34,6 +43,9 @@ class LoginEmailActivity : AppCompatActivity() {
         setListeners()
     }
 
+    /**
+     * Sets the click listeners for the buttons and text view.
+     */
     private fun setListeners() {
         val signInButton = binding.btnSignInLogin
         signInButton.setOnClickListener {
@@ -51,6 +63,11 @@ class LoginEmailActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Validates the email and password inputs and performs the sign-in or sign-up action accordingly.
+     *
+     * @param signIn True if signing in, false if signing up.
+     */
     private fun tryActionButton(signIn: Boolean) {
         val email = binding.tieEmailLogin.text.toString()
         val password = binding.tiePasswordLogin.text.toString()
@@ -78,6 +95,12 @@ class LoginEmailActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Performs sign-in with the provided email and password.
+     *
+     * @param email The user's email.
+     * @param password The user's password.
+     */
     private fun signInWithEmailAndPassword(email: String, password: String) {
         FirebaseAuth.getInstance()
             .signInWithEmailAndPassword(email, password)
@@ -96,6 +119,12 @@ class LoginEmailActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Creates a new user account with the provided email and password.
+     *
+     * @param email The user's email.
+     * @param password The user's password.
+     */
     private fun createUserWithEmailAndPassword(email: String, password: String) {
         FirebaseAuth.getInstance()
             .createUserWithEmailAndPassword(email, password)
@@ -121,6 +150,9 @@ class LoginEmailActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Sends a password reset email to the user's email address.
+     */
     private fun tryResetPassword() {
         val email = binding.tieEmailLogin.text.toString()
         val required = getString(R.string.required)
@@ -139,9 +171,12 @@ class LoginEmailActivity : AppCompatActivity() {
         }
     }
 
-    fun finishLoginActivity() {
-        val intent = Intent()
-        setResult(Activity.RESULT_OK, intent)
+    /**
+     * Finishes the [LoginEmailActivity] and returns to the previous activity.
+     */
+    private fun finishLoginActivity() {
+//        val intent = Intent()
+//        setResult(Activity.RESULT_OK, intent)
         finish()
     }
 }

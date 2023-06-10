@@ -17,10 +17,24 @@ import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
 
+/**
+ * Activity for user configuration settings.
+ *
+ * This activity allows the user to configure their account settings, such as email, password,
+ * name, and age. The user can edit these settings, delete their account, or sign out.
+ *
+ * @author Denis Yushkin
+ */
 class ConfigurationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityConfigurationBinding
     private lateinit var user: User
 
+    /**
+     * Called when the activity is starting.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being
+     *     shut down, this Bundle contains the data it most recently supplied.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityConfigurationBinding.inflate(layoutInflater)
@@ -36,6 +50,9 @@ class ConfigurationActivity : AppCompatActivity() {
         setListeners()
     }
 
+    /**
+     * Fetches the user's data and updates the UI.
+     */
     private fun fetchData() {
         val notSet = getString(R.string.value_not_set_configuration)
 
@@ -55,28 +72,19 @@ class ConfigurationActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sets the listeners for the UI elements.
+     */
     private fun setListeners() {
-        val editPasswordBtn: ImageButton = binding.btnEditPasswordConfiguration
-        editPasswordBtn.setOnClickListener {
-            onEditPasswordClick()
-        }
-
-        val editNameBtn: ImageButton = binding.btnEditNameConfiguration
-        editNameBtn.setOnClickListener {
-            onEditNameClick()
-        }
-
-        val editAgeBtn: ImageButton = binding.btnEditAgeConfiguration
-        editAgeBtn.setOnClickListener {
-            onEditAgeClick()
-        }
-
-        val deleteAccountBtn: Button = binding.btnDeleteAccount
-        deleteAccountBtn.setOnClickListener {
-            onDeleteAccountClick()
-        }
+        binding.btnEditPasswordConfiguration.setOnClickListener { onEditPasswordClick() }
+        binding.btnEditNameConfiguration.setOnClickListener { onEditNameClick() }
+        binding.btnEditAgeConfiguration.setOnClickListener { onEditAgeClick() }
+        binding.btnDeleteAccount.setOnClickListener { onDeleteAccountClick() }
     }
 
+    /**
+     * Handles the click event for the delete account button.
+     */
     private fun onDeleteAccountClick() {
         val alertDialogBuilder = AlertDialog.Builder(this)
         alertDialogBuilder.setTitle(getString(R.string.dialog_delete_account_title))
@@ -89,6 +97,10 @@ class ConfigurationActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
+
+    /**
+     * Deletes the user's account and associated data.
+     */
     private fun deleteAccount() {
         // Delete associated data to the email
         val db = Firebase.firestore
@@ -102,6 +114,9 @@ class ConfigurationActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Signs out the user and finishes the activity.
+     */
     private fun signOut() {
         val auth = FirebaseAuth.getInstance()
 
@@ -114,6 +129,9 @@ class ConfigurationActivity : AppCompatActivity() {
         finish()
     }
 
+    /**
+     * Handles the click event for the edit password button.
+     */
     private fun onEditPasswordClick() {
         val etPassword = EditText(this)
         etPassword.hint = getString(R.string.password_hint)
@@ -133,6 +151,11 @@ class ConfigurationActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
+    /**
+     * Updates the user's password.
+     *
+     * @param password The new password.
+     */
     private fun updatePassword(password: String) {
         val msg: String = if (password.length >= Constants.MIN_PASSWORD_LENGTH) {
             FirebaseAuth.getInstance().currentUser?.updatePassword(password)
@@ -144,6 +167,10 @@ class ConfigurationActivity : AppCompatActivity() {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
+
+    /**
+     * Handles the click event for the edit name button.
+     */
     private fun onEditNameClick() {
         val etName = EditText(this)
         etName.hint = getString(R.string.dialog_edit_name_hint)
@@ -163,6 +190,10 @@ class ConfigurationActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
+
+    /**
+     * Handles the click event for the edit age button.
+     */
     private fun onEditAgeClick() {
         val npAge = NumberPicker(this)
         npAge.minValue = 1
@@ -185,6 +216,12 @@ class ConfigurationActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
+    /**
+     * Updates the specified field in the Firestore database with the given value.
+     *
+     * @param field The field to update.
+     * @param value The new value.
+     */
     private fun updateValueDB(field: String, value: String) {
         val db = Firebase.firestore
         db.collection(Constants.COLLECTION_USERS)
@@ -200,6 +237,12 @@ class ConfigurationActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Updates the specified field in the Firestore database with the given value.
+     *
+     * @param field The field to update.
+     * @param value The new value.
+     */
     private fun updateValueDB(field: String, value: Long) {
         val db = Firebase.firestore
         db.collection(Constants.COLLECTION_USERS)

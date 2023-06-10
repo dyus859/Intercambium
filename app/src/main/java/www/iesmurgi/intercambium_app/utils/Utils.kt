@@ -12,8 +12,18 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-
+/**
+ * Utility functions used in the application.
+ *
+ * @author Denis Yushkin
+ */
 object Utils {
+    /**
+     * Retrieves the data of an ad and converts it into a HashMap.
+     *
+     * @param ad The [Ad] object containing the data.
+     * @return A [HashMap] containing the ad data with field names as keys.
+     */
     fun getAdData(ad: Ad): HashMap<String, Any> {
         return hashMapOf(
             Constants.ADS_FIELD_TITLE to ad.title,
@@ -26,6 +36,12 @@ object Utils {
         )
     }
 
+    /**
+     * Checks if an ad should be visible to the user based on the ad's status and the user's role.
+     *
+     * @param ad The [Ad] to check visibility for.
+     * @return `true` if the ad should be visible, `false` otherwise.
+     */
     fun isAdVisibleForUser(ad: Ad): Boolean {
         val user = SharedData.getUser().value!!
         val status = ad.status
@@ -33,9 +49,16 @@ object Utils {
 
         return user.administrator
                 || status == Constants.AD_STATUS_PUBLISHED
-                || status == Constants.AD_STATUS_REVISION && author.equals(user)
+                || status == Constants.AD_STATUS_IN_REVISION && author.equals(user)
     }
 
+    /**
+     * Retrieves the file extension of a given [Uri].
+     *
+     * @param context The context to use for accessing content providers.
+     * @param uri The [Uri] of the file.
+     * @return The file extension or `null` if not found.
+     */
     fun getFileExtension(context: Context, uri: Uri): String? {
         val document = DocumentFile.fromSingleUri(context, uri)
         return document?.name?.let { name ->
@@ -44,6 +67,13 @@ object Utils {
         }
     }
 
+    /**
+     * Generates the image path for storing an image in the storage.
+     *
+     * @param context The context to use for accessing resources.
+     * @param uri The [Uri] of the image.
+     * @return The generated image path.
+     */
     fun getImgPath(context: Context, uri: Uri): String {
         val formatter = SimpleDateFormat(Constants.STORAGE_FILE_FORMAT, Locale.getDefault())
         return (Constants.STORAGE_IMAGES_PATH
@@ -52,6 +82,12 @@ object Utils {
                 + getFileExtension(context, uri))
     }
 
+    /**
+     * Creates a temporary file and returns its [Uri].
+     *
+     * @param context The context to use for accessing resources.
+     * @return The [Uri] of the temporary file.
+     */
     fun getTmpFileUri(context: Context): Uri {
         val tmpFile = File.createTempFile("tmp_image_file", ".png", context.cacheDir).apply {
             createNewFile()
@@ -61,6 +97,12 @@ object Utils {
         return FileProvider.getUriForFile(context, "${BuildConfig.APPLICATION_ID}.provider", tmpFile)
     }
 
+    /**
+     * Navigates to a specified fragment using the given [View].
+     *
+     * @param view The [View] from which to navigate.
+     * @param resId The ID of the destination fragment.
+     */
     fun navigateToFragment(view: View?, resId: Int) {
         val navController = view?.findNavController()
         navController?.popBackStack()

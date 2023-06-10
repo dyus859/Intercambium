@@ -1,10 +1,22 @@
 package www.iesmurgi.intercambium_app.models
 
+/**
+ * Represents a province.
+ *
+ * @property name The name of the province.
+ * @property region The region where the province is located.
+ * @constructor Creates an instance of the [Province] class.
+ *
+ * @author Denis Yushkin
+ */
 data class Province(
     val name: String = "",
     val region: String = "",
 ) {
     companion object {
+        /**
+         * The list of provinces.
+         */
         val provinceSource = listOf(
             Province("Álava", "País Vasco"),
             Province("Albacete", "Castilla-La Mancha"),
@@ -59,6 +71,11 @@ data class Province(
         )
     }
 
+    /**
+     * Returns a string representation of the province.
+     *
+     * @return The name of the province.
+     */
     override fun toString(): String {
         return name
     }

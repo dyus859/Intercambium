@@ -19,11 +19,21 @@ import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
 import www.iesmurgi.intercambium_app.utils.Utils
 
+/**
+ * Activity for displaying the user's ads.
+ *
+ * @author Denis Yushkin
+ */
 class MyAdsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMyAdsBinding
     private lateinit var adapter: AdAdapter
     private lateinit var user: User
 
+    /**
+     * Called when the activity is starting.
+     *
+     * @param savedInstanceState The saved instance state.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMyAdsBinding.inflate(layoutInflater)
@@ -36,11 +46,18 @@ class MyAdsActivity : AppCompatActivity() {
         handleSwipeRefresh()
     }
 
+
+    /**
+     * Called when the activity is resumed.
+     */
     override fun onResume() {
         super.onResume()
         recyclerView()
     }
 
+    /**
+     * Sets up the swipe refresh layout and its listener.
+     */
     private fun handleSwipeRefresh() {
         val swipeRefreshLayout = binding.swipeRefreshLayoutMyAds
         swipeRefreshLayout.setOnRefreshListener {
@@ -48,6 +65,9 @@ class MyAdsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sets up the recycler view and loads the ads from the database.
+     */
     private fun recyclerView() {
         if (!this::adapter.isInitialized) {
             adapter = AdAdapter(applicationContext) { onItemClick(it) }
@@ -63,6 +83,11 @@ class MyAdsActivity : AppCompatActivity() {
         loadAdsFromDB()
     }
 
+    /**
+     * Handles the click event on an ad item in the recycler view.
+     *
+     * @param ad The clicked [Ad].
+     */
     private fun onItemClick(ad: Ad) {
         // If user is not authorized, open the profile fragment to authorize
         if (FirebaseAuth.getInstance().currentUser == null) {
@@ -75,6 +100,9 @@ class MyAdsActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    /**
+     * Loads the ads from the database and updates the recycler view.
+     */
     private fun loadAdsFromDB() {
         // Show ProgressBar
         binding.pbMyAds.show()
@@ -127,6 +155,9 @@ class MyAdsActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Handles the display of the "No ads" message based on the state of the ad list.
+     */
     private fun handleNoAdsMsg() {
         // Hide refreshing animation
         binding.swipeRefreshLayoutMyAds.isRefreshing = false
@@ -134,7 +165,6 @@ class MyAdsActivity : AppCompatActivity() {
         // Hide ProgressBar
         binding.pbMyAds.hide()
 
-        println(adapter.getVisibleAdsCount())
         if (adapter.adList.size == 0 || adapter.getVisibleAdsCount() == 0) {
             binding.tvNoAdsMyAds.visibility = View.VISIBLE
         } else {
@@ -142,6 +172,9 @@ class MyAdsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Finishes the activity and sets the result as OK.
+     */
     private fun finishMyAdsActivity() {
         val intent = Intent()
         setResult(Activity.RESULT_OK, intent)

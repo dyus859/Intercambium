@@ -18,15 +18,30 @@ import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.models.adapters.AdAdapter
 import www.iesmurgi.intercambium_app.ui.AdActivity
-import www.iesmurgi.intercambium_app.ui.AddAdActivity
+import www.iesmurgi.intercambium_app.ui.AddEditAdActivity
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.Utils
 
+/**
+ * A fragment representing the Home screen.
+ * This fragment displays a list of ads and provides functionality to add a new ad,
+ * refresh the list, and handle item click events.
+ *
+ * @author Denis Yushkin
+ */
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
     private lateinit var adapter: AdAdapter
 
+    /**
+     * Inflates the layout for the [HomeFragment] and initializes UI components.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment.
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state as given here.
+     * @return The root View of the inflated layout for the fragment.
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -41,11 +56,17 @@ class HomeFragment : Fragment() {
         return root
     }
 
+    /**
+     * Called when the fragment is resumed. Updates the recyclerView.
+     */
     override fun onResume() {
         super.onResume()
         recyclerView()
     }
 
+    /**
+     * Handles the behavior of the 'Add an ad' button based on user authorization status.
+     */
     private fun handleAddButton() {
         // Don't show 'Add an ad' button if user is not authorized
         if (FirebaseAuth.getInstance().currentUser == null) {
@@ -56,11 +77,15 @@ class HomeFragment : Fragment() {
 
         // When user clicks on 'Add an ad'
         binding.fabAddHome.setOnClickListener {
-            val intent = Intent(activity!!, AddAdActivity::class.java)
+            val intent = Intent(activity!!, AddEditAdActivity::class.java)
+            intent.putExtra("GOTO", "MainActivity")
             startActivity(intent)
         }
     }
 
+    /**
+     * Sets up the behavior of the swipe refresh layout.
+     */
     private fun handleSwipeRefresh() {
         val swipeRefreshLayout = binding.swipeRefreshLayoutHome
         swipeRefreshLayout.setOnRefreshListener {
@@ -68,6 +93,9 @@ class HomeFragment : Fragment() {
         }
     }
 
+    /**
+     * Sets up the RecyclerView and loads ads from the database.
+     */
     private fun recyclerView() {
         val context = requireContext()
 
@@ -85,6 +113,11 @@ class HomeFragment : Fragment() {
         loadAdsFromDB()
     }
 
+    /**
+     * Handles the item click event in the [androidx.recyclerview.widget.RecyclerView].
+     *
+     * @param ad The clicked [Ad] object.
+     */
     private fun onItemClick(ad: Ad) {
         // If user is not authorized, open the profile fragment to authorize
         if (FirebaseAuth.getInstance().currentUser == null) {
@@ -97,6 +130,9 @@ class HomeFragment : Fragment() {
         startActivity(intent)
     }
 
+    /**
+     * Loads ads from the Firestore database.
+     */
     private fun loadAdsFromDB() {
         binding.pbHome.show()
 
@@ -174,11 +210,13 @@ class HomeFragment : Fragment() {
             }
     }
 
+    /**
+     * Handles the visibility of the 'No ads' message based on the presence and visibility of ads.
+     */
     private fun handleNoAdsMsg() {
         binding.swipeRefreshLayoutHome.isRefreshing = false
         binding.pbHome.hide()
 
-        println(adapter.getVisibleAdsCount())
         if (adapter.adList.size == 0 || adapter.getVisibleAdsCount() == 0) {
             binding.tvNoAdsHome.visibility = View.VISIBLE
         } else {

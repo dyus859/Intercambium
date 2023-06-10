@@ -13,14 +13,37 @@ import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.Utils
 
+/**
+ * [androidx.recyclerview.widget.RecyclerView] adapter for displaying ads.
+ *
+ * @param context The context in which the adapter is used.
+ * @param onItemClick Callback function to handle item click events.
+ *
+ * @author Denis Yushkin
+ */
 class AdAdapter(
     private val context: Context,
     private val onItemClick: (Ad)->Unit
 ) : RecyclerView.Adapter<AdAdapter.AdViewHolder>() {
 
+    /**
+     * List of [Ad] objects to be displayed.
+     */
     val adList = mutableListOf<Ad>()
 
-    inner class AdViewHolder(private val itemBinding: ItemAdBinding) : RecyclerView.ViewHolder(itemBinding.root) {
+    /**
+     * [androidx.recyclerview.widget.RecyclerView.ViewHolder] class for ads.
+     *
+     * @param itemBinding The binding object for the item view.
+     */
+    inner class AdViewHolder(private val itemBinding: ItemAdBinding):
+        RecyclerView.ViewHolder(itemBinding.root) {
+
+        /**
+         * Binds an ad to the view holder.
+         *
+         * @param ad The [Ad] object to bind.
+         */
         fun bind(ad: Ad) = with(itemBinding) {
             val canUserSeeAd = Utils.isAdVisibleForUser(ad)
 
@@ -30,11 +53,13 @@ class AdAdapter(
             }
             itemView.visibility = View.VISIBLE
 
-            if (ad.status == Constants.AD_STATUS_REVISION || ad.status == Constants.AD_STATUS_HIDDEN) {
+            if (ad.status == Constants.AD_STATUS_IN_REVISION) {
                 cvAdContainer.setBackgroundColor(ContextCompat.getColor(itemView.context,
-                    R.color.light_gray))
+                    R.color.pale_yellow))
                 ivAdHidden.visibility = View.VISIBLE
             } else {
+                cvAdContainer.setBackgroundColor(ContextCompat.getColor(itemView.context,
+                    R.color.light_gray))
                 ivAdHidden.visibility = View.GONE
             }
 
@@ -65,17 +90,40 @@ class AdAdapter(
         }
     }
 
+    /**
+     * Creates a new [AdViewHolder] by inflating the item layout.
+     *
+     * @param parent The [ViewGroup] into which the new [View] will be added.
+     * @param viewType The view type of the new [View].
+     * @return A new [AdViewHolder] that holds the inflated item view.
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AdViewHolder {
         val itemBinding = ItemAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return AdViewHolder(itemBinding)
     }
 
+    /**
+     * Binds the data to the specified [AdViewHolder].
+     *
+     * @param holder The [AdViewHolder] to bind data to.
+     * @param position The position of the item in the data set.
+     */
     override fun onBindViewHolder(holder: AdViewHolder, position: Int) {
         holder.bind(adList[position])
     }
 
+    /**
+     * Returns the total number of items in the data set.
+     *
+     * @return The total number of items in the [adList].
+     */
     override fun getItemCount(): Int = adList.size
 
+    /**
+     * Returns the count of visible ads in the list.
+     *
+     * @return The count of visible ads.
+     */
     fun getVisibleAdsCount(): Int = adList.count { it.visible }
 
 }

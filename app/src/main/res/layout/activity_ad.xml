@@ -7,10 +7,16 @@
     tools:context=".ui.AdActivity">
 
     <LinearLayout
+        android:id="@+id/ll_data_ad"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:baselineAligned="false">
+        android:baselineAligned="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -95,7 +101,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:id="@+id/iv_ad_hidden_info"
@@ -117,7 +124,6 @@
 
             </LinearLayout>
 
-
             <TextView
                 android:id="@+id/tv_item_ad_description_info"
                 android:layout_width="match_parent"
@@ -132,33 +138,101 @@
 
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_open_chat_ad"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="280dp"
+    <LinearLayout
+        android:id="@+id/ll_actions_ad"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/chat"
-        android:text="@string/open_chat"
-        android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textSize="15sp"
-        app:backgroundTint="@android:color/transparent"
-        app:cornerRadius="8dp"
-        app:rippleColor="#33AAAAAA"
-        app:strokeColor="@color/black"
-        app:strokeWidth="2dp"
+        android:visibility="invisible"
+        android:orientation="horizontal"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.95"
-        tools:ignore="RtlHardcoded" />
+        app:layout_constraintTop_toBottomOf="@id/ll_data_ad"
+        app:layout_constraintVertical_bias="0.1">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_publish_ad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:backgroundTint="@color/dark_green"
+            android:minWidth="0dp"
+            app:icon="@drawable/ic_baseline_done_24"
+            app:iconPadding="0dp"
+            tools:ignore="RtlHardcoded" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_hide_ad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:backgroundTint="@color/dimgray"
+            android:minWidth="0dp"
+            app:icon="@drawable/ic_hidden_24"
+            app:iconPadding="0dp"
+            tools:ignore="RtlHardcoded" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_edit_ad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:minWidth="0dp"
+            app:icon="@drawable/ic_baseline_edit_24"
+            app:iconPadding="0dp"
+            tools:ignore="RtlHardcoded" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_delete_ad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:backgroundTint="@color/red"
+            android:minWidth="0dp"
+            app:icon="@drawable/ic_baseline_delete_forever_24"
+            app:iconPadding="0dp"
+            tools:ignore="RtlHardcoded" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_chat_ad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|center_horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_actions_ad"
+        app:layout_constraintVertical_bias="0.8">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_open_chat_ad"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:text="@string/open_chat"
+            app:icon="@drawable/ic_baseline_chat_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.95"
+            tools:ignore="RtlHardcoded" />
+
+    </LinearLayout>
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/pb_ad_info"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

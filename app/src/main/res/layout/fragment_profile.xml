@@ -17,48 +17,32 @@
         app:layout_constraintVertical_bias="0.1"
         app:srcCompat="@drawable/logo_text2" />
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_my_ads_profile"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ads"
+        android:drawableLeft="@drawable/ic_baseline_campaign_24"
         android:text="@string/my_ads_profile"
-        android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textSize="15sp"
-        app:backgroundTint="@android:color/transparent"
-        app:cornerRadius="8dp"
-        app:rippleColor="#33AAAAAA"
-        app:strokeColor="@color/black"
-        app:strokeWidth="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/siv_logo_profile"
-        app:layout_constraintVertical_bias="0.12"
+        app:layout_constraintVertical_bias="0.099"
         tools:ignore="RtlHardcoded" />
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_configuration_profile"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/settings"
+        android:drawableLeft="@drawable/ic_baseline_settings_24"
         android:text="@string/configuration_profile"
-        android:textAllCaps="false"
-        android:textColor="@color/black"
-        android:textSize="15sp"
-        app:backgroundTint="@android:color/transparent"
-        app:cornerRadius="8dp"
-        app:rippleColor="#33AAAAAA"
-        app:strokeColor="@color/black"
-        app:strokeWidth="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_my_ads_profile"
-        app:layout_constraintVertical_bias="0.01"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="RtlHardcoded" />
 
     <com.google.android.material.button.MaterialButton

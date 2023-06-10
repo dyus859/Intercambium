@@ -23,19 +23,32 @@ import www.iesmurgi.intercambium_app.ui.LoginEmailActivity
 import www.iesmurgi.intercambium_app.ui.MyAdsActivity
 import www.iesmurgi.intercambium_app.utils.Utils
 
+/**
+ * A fragment representing the Profile screen.
+ * This fragment displays the user's profile information and provides options for authentication,
+ *  such as signing in with email or Google. It also allows the user to navigate to other activities,
+ *  such as [MyAdsActivity] and [ConfigurationActivity].
+ *
+ * @constructor Creates an instance of [ProfileFragment].
+ *
+ * @author Denis Yushkin
+ */
 class ProfileFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileBinding
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
-
-    private val signInGoogleLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract()
-    ) { res ->
-        onSignInResult(res)
-    }
+    private lateinit var signInGoogleLauncher: ActivityResultLauncher<Intent>
 
     private var showLogoutMessage: Boolean = false
 
+    /**
+     * Inflates the layout for the [ProfileFragment] and initializes UI components.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment.
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state as given here.
+     * @return The root View of the inflated layout for the fragment.
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -44,6 +57,20 @@ class ProfileFragment : Fragment() {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        setLaunchers()
+        setListeners()
+
+        // Enable options menu
+        setHasOptionsMenu(true)
+
+        return root
+    }
+
+    /**
+     * Sets up the activity result launchers for various actions.
+     */
+    private fun setLaunchers() {
+        // Register activity result launcher for general activity launch
         activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 // Navigate back to the Profile Fragment
@@ -54,15 +81,16 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        createListeners()
-
-        // Enable options menu
-        setHasOptionsMenu(true)
-
-        return root
+        // Register activity result launcher for Firebase AuthUI activity
+        signInGoogleLauncher = registerForActivityResult(FirebaseAuthUIActivityResultContract()) { res ->
+            onSignInResult(res)
+        }
     }
 
-    private fun createListeners() {
+    /**
+     * Sets up the listeners for various buttons and actions in the Profile fragment.
+     */
+    private fun setListeners() {
         FirebaseAuth.getInstance().addAuthStateListener {
             val authenticated = it.currentUser != null
             setUserAuthenticated(authenticated)
@@ -89,6 +117,11 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    /**
+     * Sets the visibility of UI elements based on the user's authentication status.
+     *
+     * @param authenticated True if the user is authenticated, false otherwise.
+     */
     private fun setUserAuthenticated(authenticated: Boolean) {
         val map = mutableMapOf(
             binding.signInEmail to false,
@@ -115,11 +148,19 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    /**
+     * Opens the [LoginEmailActivity] to allow the user to sign in with email.
+     */
     private fun openLoginEmailActivity() {
         val intent = Intent(requireContext(), LoginEmailActivity::class.java)
         activityLauncher.launch(intent)
     }
 
+    /**
+     * Initiates the Google sign-in process.
+     *
+     * @param signInLauncher The [ActivityResultLauncher] used to launch the sign-in activity.
+     */
     private fun signInWithGoogle(signInLauncher: ActivityResultLauncher<Intent>) {
         val providerGoogle = arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build())
 
@@ -130,6 +171,11 @@ class ProfileFragment : Fragment() {
         signInLauncher.launch(intent)
     }
 
+    /**
+     * Handles the result of a sign-in attempt using FirebaseUI.
+     *
+     * @param result The result of the sign-in attempt.
+     */
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
         if (result.resultCode == Activity.RESULT_OK) {
             // Successfully signed in
@@ -145,6 +191,12 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    /**
+     * Inflate the options menu for the Profile fragment.
+     *
+     * @param menu The Menu object to inflate.
+     * @param inflater The MenuInflater object that can be used to inflate the menu.
+     */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         if (FirebaseAuth.getInstance().currentUser != null) {
             inflater.inflate(R.menu.menu_sign_out, menu)
@@ -153,6 +205,12 @@ class ProfileFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    /**
+     * Handles options menu item selections.
+     *
+     * @param item The selected [MenuItem] object.
+     * @return True if the selection was handled, false otherwise.
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.item_sign_out && FirebaseAuth.getInstance().currentUser != null) {
             showSignOutDialog()
@@ -161,6 +219,9 @@ class ProfileFragment : Fragment() {
         return true
     }
 
+    /**
+     * Displays a dialog asking the user to confirm the sign-out action.
+     */
     private fun showSignOutDialog() {
         val view = LayoutInflater.from(activity).inflate(R.layout.dialog_sign_out, null)
         val dialogSignOutBinding = DialogSignOutBinding.bind(view)
@@ -182,13 +243,17 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // A method that is used to open a new activity (My Ads)
+    /**
+     * Opens the [MyAdsActivity] to allow the user to view their ads.
+     */
     private fun openMyAdsActivity() {
         val intent = Intent(requireContext(), MyAdsActivity::class.java)
         activityLauncher.launch(intent)
     }
 
-    // A method that is used to open a new activity (Configuration)
+    /**
+     * Opens the [ConfigurationActivity] to allow the user to configure their settings.
+     */
     private fun openConfigurationActivity() {
         val intent = Intent(requireContext(), ConfigurationActivity::class.java)
         activityLauncher.launch(intent)
