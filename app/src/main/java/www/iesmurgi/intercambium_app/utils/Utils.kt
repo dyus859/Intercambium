@@ -9,7 +9,6 @@ import androidx.navigation.findNavController
 import www.iesmurgi.intercambium_app.BuildConfig
 import www.iesmurgi.intercambium_app.models.Ad
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -70,14 +69,16 @@ object Utils {
     /**
      * Generates the image path for storing an image in the storage.
      *
-     * @param context The context to use for accessing resources.
+     * @param context The [Context] to use for accessing resources.
      * @param uri The [Uri] of the image.
      * @return The generated image path.
      */
     fun getImgPath(context: Context, uri: Uri): String {
-        val formatter = SimpleDateFormat(Constants.STORAGE_FILE_FORMAT, Locale.getDefault())
+        // Generate a unique image ID
+        val uniqueImageId = UUID.randomUUID().toString()
+
         return (Constants.STORAGE_IMAGES_PATH
-                + formatter.format(Date())
+                + uniqueImageId
                 + "."
                 + getFileExtension(context, uri))
     }

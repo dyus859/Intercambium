@@ -105,11 +105,6 @@ object Constants {
     const val MAX_DESCRIPTION_LENGTH = 256
 
     /**
-     * Format for storing images in the storage.
-     */
-    const val STORAGE_FILE_FORMAT = "yyyy_MM_dd_HH_mm_ss"
-
-    /**
      * Path for storing images in the storage.
      */
     const val STORAGE_IMAGES_PATH = "images/"

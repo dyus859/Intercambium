@@ -35,7 +35,7 @@ import www.iesmurgi.intercambium_app.utils.Utils
  */
 class AddEditAdActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddEditAdBinding
-    private var adId: String = ""
+    private lateinit var ad: Ad
 
     private var selectedProvinceName: String = ""
     private var latestImgUri: Uri? = null
@@ -111,7 +111,7 @@ class AddEditAdActivity : AppCompatActivity() {
      * @return true if the activity is in editing mode, false otherwise.
      */
     private fun isEditing(): Boolean {
-        return adId.isNotEmpty()
+        return this::ad.isInitialized
     }
 
     /**
@@ -208,25 +208,26 @@ class AddEditAdActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { adDocument ->
                 if (adDocument.exists()) {
-                    adId = adDocument.id
                     val adTitle = adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
                     val adDesc = adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
                     val adProvince = adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
                     val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
+                    ad = Ad(adDocument.id, adTitle, adDesc, adProvince)
+                    ad.imgUrl = adImgUrl
 
-                    binding.tieAdTitle.setText(adTitle)
-                    binding.tieAdDescription.setText(adDesc)
+                    binding.tieAdTitle.setText(ad.title)
+                    binding.tieAdDescription.setText(ad.description)
 
-                    if (adImgUrl.isNotEmpty()) {
+                    if (ad.imgUrl.isNotEmpty()) {
                         Glide.with(this)
-                            .load(adImgUrl)
+                            .load(ad.imgUrl)
                             .into(binding.ivImageAdd)
                     }
 
                     binding.pbAddEditAd.hide()
 
-                    selectedProvinceName = adProvince
-                    binding.mactAdProvince.setText(adProvince, false)
+                    selectedProvinceName = ad.province
+                    binding.mactAdProvince.setText(ad.province, false)
                     binding.mactAdProvince.setSelection(binding.mactAdProvince.text.length)
                 } else {
                     handleFailure()
@@ -344,17 +345,18 @@ class AddEditAdActivity : AppCompatActivity() {
     }
 
     /**
-     * Handles the click event for saving the ad data.
-     * Validates the input fields and updates or publishes the ad.
+     * Validates the input data for the ad title, description, province and image.
+     *
+     * @param title The title of the ad.
+     * @param description The description of the ad.
+     * @return `true` if the input data is valid, `false` otherwise.
      */
-    private fun onSaveClick() {
-        val title = binding.tieAdTitle.text.toString().trim()
-
+    private fun validInputData(title: String, description: String): Boolean {
         if (title.length < Constants.MIN_TITLE_LENGTH) {
             binding.tieAdTitle.error = getString(R.string.error_title_min_length,
                 Constants.MIN_TITLE_LENGTH)
             binding.tieAdTitle.requestFocus()
-            return
+            return false
         }
 
         if (title.length > Constants.MAX_TITLE_LENGTH) {
@@ -362,16 +364,14 @@ class AddEditAdActivity : AppCompatActivity() {
                 title.length,
                 Constants.MAX_TITLE_LENGTH)
             binding.tieAdTitle.requestFocus()
-            return
+            return false
         }
-
-        val description = binding.tieAdDescription.text.toString().trim()
 
         if (description.length < Constants.MIN_DESCRIPTION_LENGTH) {
             binding.tieAdDescription.error = getString(R.string.error_desc_min_length,
                 Constants.MIN_DESCRIPTION_LENGTH)
             binding.tieAdDescription.requestFocus()
-            return
+            return false
         }
 
         if (description.length > Constants.MAX_DESCRIPTION_LENGTH) {
@@ -379,32 +379,62 @@ class AddEditAdActivity : AppCompatActivity() {
                 description.length,
                 Constants.MAX_DESCRIPTION_LENGTH)
             binding.tieAdDescription.requestFocus()
-            return
+            return false
         }
 
         // User hasn't selected any province
         if (selectedProvinceName.isEmpty()) {
             binding.mactAdProvince.error = getString(R.string.required)
             binding.mactAdProvince.requestFocus()
-            return
+            return false
         }
 
         // The selected value doesn't match with the current value in the AutoCompleteTextView
         if (selectedProvinceName != binding.mactAdProvince.text.toString()) {
             binding.mactAdProvince.error = getString(R.string.error_invalid_province_name)
             binding.mactAdProvince.requestFocus()
+            return false
+        }
+
+        // Image is required
+        if (binding.ivImageAdd.drawable == null) {
+            val msg = getString(R.string.image_missing)
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * Handles the click event for saving the ad data.
+     * Validates the input fields and updates or publishes the ad.
+     */
+    private fun onSaveClick() {
+        val title = binding.tieAdTitle.text.toString().trim()
+        val description = binding.tieAdDescription.text.toString().trim()
+
+        if (!validInputData(title, description)) {
+            // Something is invalid, cannot save
             return
         }
 
+        // Disable saving option for now
         canSave = false
 
-        val ad = Ad(adId, title, description, selectedProvinceName)
-        ad.author = User(SharedData.getUser().value!!)
+        val tempAd = Ad(ad.id, title, description, selectedProvinceName)
+        tempAd.imgUrl = ad.imgUrl
+        tempAd.author = User(SharedData.getUser().value!!)
 
-        // If there is an image, first need to upload it
-        if (latestImgUri != null) {
-            // Show ProgressBar
-            binding.pbAddEditAd.show()
+        // Show ProgressBar
+        binding.pbAddEditAd.show()
+
+        if (latestImgUri == null) {
+            // Image is not updated, just update the other information
+            updatePublishAd(tempAd)
+        } else {
+            // Image is updated, need to upload the image first
 
             val imgReference = Utils.getImgPath(this, latestImgUri!!)
             val storageReference = FirebaseStorage.getInstance().getReference(imgReference)
@@ -419,15 +449,10 @@ class AddEditAdActivity : AppCompatActivity() {
                             handleUpdatingPublishingFailure()
                         }
                         .addOnSuccessListener { uri ->
-                            ad.imgUrl = uri.toString()
-                            updatePublishAd(ad)
+                            tempAd.imgUrl = uri.toString()
+                            updatePublishAd(tempAd)
                         }
                 }
-        } else {
-            // Show ProgressBar
-            binding.pbAddEditAd.show()
-
-            updatePublishAd(ad)
         }
     }
 
@@ -441,10 +466,10 @@ class AddEditAdActivity : AppCompatActivity() {
         val collection = db.collection(Constants.COLLECTION_ADS)
         val data = Utils.getAdData(ad)
 
-        val document = if (adId.isEmpty()) {
+        val document = if (!isEditing()) {
             collection.document()
         } else {
-            collection.document(adId)
+            collection.document(ad.id)
         }
 
         document.set(data)
