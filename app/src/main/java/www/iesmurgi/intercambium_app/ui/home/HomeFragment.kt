@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
@@ -238,31 +239,41 @@ class HomeFragment : Fragment() {
      * @param adDocuments The list of ad documents from the query result.
      */
     private fun processQueryResults(adDocuments: List<DocumentSnapshot>) {
-        if (adapter.adList.size != 0) {
-            adapter.notifyItemRangeRemoved(0, adapter.adList.size)
-            adapter.adList.clear()
-        }
-
         val db = Firebase.firestore
-        for (adDocument in adDocuments) {
+        val usersCollection = db.collection(Constants.COLLECTION_USERS)
+
+        // Create a list to hold the new ad items
+        val newAdList = mutableListOf<Ad>()
+
+        // Process each ad document in parallel
+        val tasks = adDocuments.map { adDocument ->
             val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
-            val usersCollection = db.collection(Constants.COLLECTION_USERS)
             val usersDocument = usersCollection.document(author)
-            usersDocument.get()
-                .addOnSuccessListener { userDocument ->
-                    // If this account doesn't exist anymore, don't show the ad
-                    if (userDocument.exists()) {
-                        val user = userDocument.toUser()
-                        val ad = adDocument.toAd(user)
-                        ad.visible = Utils.isAdVisibleForUser(ad)
+            usersDocument.get().addOnSuccessListener { userDocument ->
+                // If this account doesn't exist anymore, don't show the ad
+                if (userDocument.exists()) {
+                    val user = userDocument.toUser()
+                    val ad = adDocument.toAd(user)
+                    ad.visible = Utils.isAdVisibleForUser(ad)
 
-                        adapter.notifyItemInserted(adapter.adList.size)
-                        adapter.adList.add(ad)
-                    }
-
-                    handleNoAdsMsg()
+                    newAdList.add(ad)
                 }
+            }
         }
+
+        // Wait for all tasks to complete
+        Tasks.whenAllSuccess<DocumentSnapshot>(tasks)
+            .addOnCompleteListener {
+                // Clear the existing ad list and add the new ad items
+                adapter.adList.clear()
+                adapter.adList.addAll(newAdList)
+
+                // Notify the adapter of the changes
+                adapter.notifyDataSetChanged()
+
+                // Handle no ads message
+                handleNoAdsMsg()
+            }
 
         if (adDocuments.isEmpty()) {
             handleNoAdsMsg()
