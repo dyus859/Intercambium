@@ -53,10 +53,7 @@ class ConfigurationActivity : AppCompatActivity() {
         binding = ActivityConfigurationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Return to the previous activity
         actionBar?.setDisplayHomeAsUpEnabled(true)
-
-        // Get user's data
         user = SharedData.getUser().value!!
 
         setLaunchers()
@@ -199,25 +196,46 @@ class ConfigurationActivity : AppCompatActivity() {
     }
 
     /**
-     * Handles the click event for the edit password button.
+     * Creates and shows an [AlertDialog] with the specified title, view, and optional onSuccess callback.
+     *
+     * @param title The title of the [AlertDialog].
+     * @param view The View to be displayed within the [AlertDialog].
+     * @param onSuccess An optional callback function to be executed when the positive button is clicked.
+     *                  It is invoked with no arguments.
+     * @return The created [AlertDialog] instance.
      */
-    private fun onEditPasswordClick() {
-        val etPassword = EditText(this)
-        etPassword.hint = getString(R.string.password_hint)
-        etPassword.inputType = InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
-
+    private fun createAlertDialog(title: String, view: View, onSuccess: (() -> Unit)?): AlertDialog {
         val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setView(etPassword)
-        alertDialogBuilder.setTitle(getString(R.string.dialog_edit_password_title))
+        alertDialogBuilder.setView(view)
+        alertDialogBuilder.setTitle(title)
         alertDialogBuilder.setIcon(R.mipmap.ic_launcher)
         alertDialogBuilder.setPositiveButton(getString(android.R.string.ok)) { _: DialogInterface, _: Int ->
-            if (etPassword.text.isNotEmpty()) {
-                updatePassword(etPassword.text.toString())
+            if (onSuccess != null) {
+                onSuccess()
             }
         }
         alertDialogBuilder.setNegativeButton(getString(android.R.string.cancel), null)
         val alertDialog = alertDialogBuilder.create()
         alertDialog.show()
+
+        return alertDialog
+    }
+
+    /**
+     * Handles the click event for the edit password button.
+     */
+    private fun onEditPasswordClick() {
+        val title = getString(R.string.dialog_edit_password_title)
+        val etPassword = EditText(this).apply {
+            hint = getString(R.string.password_hint)
+            inputType = InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
+        }
+
+        createAlertDialog(title, etPassword) {
+            if (etPassword.text.isNotEmpty()) {
+                updatePassword(etPassword.text.toString())
+            }
+        }
     }
 
     /**
@@ -241,49 +259,38 @@ class ConfigurationActivity : AppCompatActivity() {
      * Handles the click event for the edit name button.
      */
     private fun onEditNameClick() {
-        val etName = EditText(this)
-        etName.hint = getString(R.string.dialog_edit_name_hint)
-        etName.isSingleLine = true
+        val title = getString(R.string.dialog_edit_name_title)
+        val etName = EditText(this).apply {
+            hint = getString(R.string.dialog_edit_name_hint)
+            isSingleLine = true
+        }
 
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setView(etName)
-        alertDialogBuilder.setTitle(getString(R.string.dialog_edit_name_title))
-        alertDialogBuilder.setIcon(R.mipmap.ic_launcher)
-        alertDialogBuilder.setPositiveButton(getString(android.R.string.ok)) { _: DialogInterface, _: Int ->
+        createAlertDialog(title, etName) {
             if (etName.text.isNotEmpty()) {
                 updateValueDB(Constants.USERS_FIELD_NAME, etName.text.toString().trim())
             }
         }
-        alertDialogBuilder.setNegativeButton(getString(android.R.string.cancel), null)
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
     }
-
 
     /**
      * Handles the click event for the edit age button.
      */
     private fun onEditAgeClick() {
+        val title = getString(R.string.dialog_edit_age)
         val npAge = NumberPicker(this)
         npAge.minValue = 1
         npAge.maxValue = 120
 
-        if (user.age != null) {
+        if (user.age != 0L) {
             // Set current age for the NumberPicker
             npAge.value = Math.toIntExact(user.age!!)
         }
 
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setView(npAge)
-        alertDialogBuilder.setTitle(getString(R.string.dialog_edit_age))
-        alertDialogBuilder.setIcon(R.mipmap.ic_launcher)
-        alertDialogBuilder.setPositiveButton(getString(android.R.string.ok)) { _: DialogInterface, _: Int ->
+        createAlertDialog(title, npAge) {
             updateValueDB(Constants.USERS_FIELD_AGE, npAge.value.toLong())
         }
-        alertDialogBuilder.setNegativeButton(getString(android.R.string.cancel), null)
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
     }
+
 
     /**
      * Updates the specified field in the Firestore database with the given value.
@@ -291,35 +298,16 @@ class ConfigurationActivity : AppCompatActivity() {
      * @param field The field to update.
      * @param value The new value.
      */
-    private fun updateValueDB(field: String, value: String) {
+    private fun updateValueDB(field: String, value: Any) {
         val db = Firebase.firestore
         db.collection(Constants.COLLECTION_USERS)
             .document(user.email)
             .update(field, value)
             .addOnSuccessListener {
                 if (field == Constants.USERS_FIELD_NAME) {
-                    user.name = value
-                }
-
-                // Update activity values
-                fetchData()
-            }
-    }
-
-    /**
-     * Updates the specified field in the Firestore database with the given value.
-     *
-     * @param field The field to update.
-     * @param value The new value.
-     */
-    private fun updateValueDB(field: String, value: Long) {
-        val db = Firebase.firestore
-        db.collection(Constants.COLLECTION_USERS)
-            .document(user.email)
-            .update(field, value)
-            .addOnSuccessListener {
-                if (field == Constants.USERS_FIELD_AGE) {
-                    user.age = value
+                    user.name = value as String
+                } else if (field == Constants.USERS_FIELD_AGE) {
+                    user.age = value as Long
                 }
 
                 // Update activity values
@@ -334,16 +322,11 @@ class ConfigurationActivity : AppCompatActivity() {
      *  or [takeImage]) is called, and the dialog is dismissed.
      */
     private fun onEditProfilePictureClick() {
+        val title = getString(R.string.edit_image_title)
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_image, null)
         val editImageBinding = DialogEditImageBinding.bind(view)
 
-        val alertDialogBuilder = AlertDialog.Builder(this)
-            .setTitle(getString(R.string.edit_image_title))
-            .setNegativeButton(getString(android.R.string.cancel), null)
-            .setView(view)
-
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
+        val alertDialog = createAlertDialog(title, view, null)
 
         // User has selected 'Gallery'
         editImageBinding.tvChooseFromGallery.setOnClickListener {
