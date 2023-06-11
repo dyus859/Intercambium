@@ -69,17 +69,44 @@ class AdActivity : AppCompatActivity() {
             }
         }
 
-        getData()
         setListeners()
+        handleSwipeRefresh()
+        fetchData(true)
+    }
+
+    /**
+     * Sets the click listeners for all buttons in the activity.
+     */
+    private fun setListeners() {
+        with(binding) {
+            btnPublishAd.setOnClickListener { onPublishClick() }
+            btnHideAd.setOnClickListener { onHideClick() }
+            btnEditAd.setOnClickListener { onEditClick() }
+            btnDeleteAd.setOnClickListener { onDeleteClick() }
+//            btnOpenChatAd.setOnClickListener { onOpenChatClick()}
+        }
+    }
+
+    /**
+     * Sets up the behavior of the swipe refresh layout.
+     */
+    private fun handleSwipeRefresh() {
+        val swipeRefreshLayout = binding.swipeRefreshLayoutAd
+        swipeRefreshLayout.setOnRefreshListener {
+            fetchData(false)
+        }
     }
 
     /**
      * Retrieves the ID of the ad from the previous activity and loads the ad information.
      */
-    private fun getData() {
+    private fun fetchData(showProgressBar: Boolean) {
         val extras = intent.extras ?: return
         extras.getString("AD")?.let {
-            binding.pbAdInfo.show()
+            if (showProgressBar) {
+                binding.pbAdInfo.show()
+            }
+
             loadAd(it)
         }
     }
@@ -132,7 +159,13 @@ class AdActivity : AppCompatActivity() {
      * Displays an error message and finishes the activity.
      */
     private fun handleFailure() {
+        // Hide Swipe Refresh animation
+        binding.swipeRefreshLayoutAd.isRefreshing = false
+
+        // Hide ProgressBar
         binding.pbAdInfo.hide()
+
+        // Return back to the main activity
         finish()
 
         val text = getString(R.string.ad_could_not_be_loaded)
@@ -146,6 +179,9 @@ class AdActivity : AppCompatActivity() {
      * @param ad The loaded [Ad] object.
      */
     private fun handleSuccess(ad: Ad) {
+        // Hide Swipe Refresh animation
+        binding.swipeRefreshLayoutAd.isRefreshing = false
+
         // Hide ProgressBar
         binding.pbAdInfo.hide()
 
@@ -209,20 +245,6 @@ class AdActivity : AppCompatActivity() {
 
             // Show 'Open Chat' button
             btnOpenChatAd.visibility = View.VISIBLE
-        }
-    }
-
-
-    /**
-     * Sets the click listeners for all buttons in the activity.
-     */
-    private fun setListeners() {
-        with(binding) {
-            btnPublishAd.setOnClickListener { onPublishClick() }
-            btnHideAd.setOnClickListener { onHideClick() }
-            btnEditAd.setOnClickListener { onEditClick() }
-            btnDeleteAd.setOnClickListener { onDeleteClick() }
-//            btnOpenChatAd.setOnClickListener { onOpenChatClick()}
         }
     }
 
