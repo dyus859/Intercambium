@@ -89,7 +89,7 @@ class HomeFragment : Fragment() {
     /**
      * Sets up the RecyclerView and loads ads from the database.
      */
-    private fun recyclerView() {
+    private fun recyclerView(query: String = "") {
         val context = requireContext()
 
         if (!this::adapter.isInitialized) {
@@ -103,7 +103,24 @@ class HomeFragment : Fragment() {
             binding.rvAdsHome.layoutManager = LinearLayoutManager(context)
         }
 
-        loadAdsFromDB()
+        loadAdsFromDB(query)
+    }
+
+    /**
+     * Handles the item click event in the [androidx.recyclerview.widget.RecyclerView].
+     *
+     * @param ad The clicked [Ad] object.
+     */
+    private fun onItemClick(ad: Ad) {
+        // If user is not authorized, open the profile fragment to authorize
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            Utils.navigateToFragment(view, R.id.navigation_profile)
+            return
+        }
+
+        val intent = Intent(requireContext(), AdActivity::class.java)
+        intent.putExtra("AD", ad.id)
+        startActivity(intent)
     }
 
     /**
@@ -112,7 +129,12 @@ class HomeFragment : Fragment() {
     private fun handleSwipeRefresh() {
         val swipeRefreshLayout = binding.swipeRefreshLayoutHome
         swipeRefreshLayout.setOnRefreshListener {
-            recyclerView()
+            // Need to take into account that there may be a search query at the moment
+            if (!filtering) {
+                recyclerView()
+            } else {
+                recyclerView(binding.svAds.query.toString().trim())
+            }
         }
     }
 
@@ -145,22 +167,10 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Handles the item click event in the [androidx.recyclerview.widget.RecyclerView].
+     * Loads ads from the database based on the given query.
      *
-     * @param ad The clicked [Ad] object.
+     * @param query The search query string. Default is an empty string.
      */
-    private fun onItemClick(ad: Ad) {
-        // If user is not authorized, open the profile fragment to authorize
-        if (FirebaseAuth.getInstance().currentUser == null) {
-            Utils.navigateToFragment(view, R.id.navigation_profile)
-            return
-        }
-
-        val intent = Intent(requireContext(), AdActivity::class.java)
-        intent.putExtra("AD", ad.id)
-        startActivity(intent)
-    }
-
     private fun loadAdsFromDB(query: String = "") {
         binding.pbHome.show()
 
@@ -170,17 +180,15 @@ class HomeFragment : Fragment() {
 
         // Perform separate queries for 'title' and 'description' fields if the query is not empty
         if (query.isNotEmpty()) {
-            val titleQuery = adsCollection.whereEqualTo(Constants.ADS_FIELD_TITLE_LOWERCASE, query)
-            val descriptionQuery = adsCollection.whereEqualTo(Constants.ADS_FIELD_DESCRIPTION_LOWERCASE, query)
+            val titleQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_TITLE_SEARCH, query)
+            val descriptionQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_DESCRIPTION_SEARCH, query)
 
             // Execute title query
             titleQuery.get().addOnSuccessListener { titleDocuments ->
-                println("titleDocuments: ${titleDocuments.documents}")
                 // Execute description query
                 descriptionQuery.get().addOnSuccessListener { descriptionDocuments ->
                     // Merge the results
                     val mergedDocuments = mergeQueryDocuments(titleDocuments.documents, descriptionDocuments.documents)
-                    println("descriptionDocuments: ${descriptionDocuments.documents}")
                     // Process the merged documents
                     processQueryResults(mergedDocuments)
                 }.addOnFailureListener {
@@ -202,15 +210,33 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // Function to merge Firestore query documents
-    private fun mergeQueryDocuments(query1: List<DocumentSnapshot>, query2: List<DocumentSnapshot>): List<DocumentSnapshot> {
+    /**
+     * Merges Firestore query documents and removes duplicates based on document ID.
+     *
+     * @param query1 The first list of Firestore query documents.
+     * @param query2 The second list of Firestore query documents.
+     * @return The merged list of documents without duplicates.
+     */
+    private fun mergeQueryDocuments(
+        query1: List<DocumentSnapshot>,
+        query2: List<DocumentSnapshot>
+    ): List<DocumentSnapshot> {
         val mergedDocuments = mutableListOf<DocumentSnapshot>()
         mergedDocuments.addAll(query1)
         mergedDocuments.addAll(query2)
-        return mergedDocuments
+
+        // Remove duplicates based on document ID
+        val uniqueDocuments = linkedSetOf<DocumentSnapshot>()
+        uniqueDocuments.addAll(mergedDocuments)
+
+        return uniqueDocuments.toList()
     }
 
-    // Function to process the query results
+    /**
+     * Processes the query results and updates the RecyclerView.
+     *
+     * @param adDocuments The list of ad documents from the query result.
+     */
     private fun processQueryResults(adDocuments: List<DocumentSnapshot>) {
         if (adapter.adList.size != 0) {
             adapter.notifyItemRangeRemoved(0, adapter.adList.size)

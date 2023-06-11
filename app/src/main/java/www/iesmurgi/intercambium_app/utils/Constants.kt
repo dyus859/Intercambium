@@ -22,19 +22,9 @@ object Constants {
     const val ADS_FIELD_TITLE = "title"
 
     /**
-     * Field name for the lowercase title of an ad document.
-     */
-    const val ADS_FIELD_TITLE_LOWERCASE = "title_lowercase"
-
-    /**
      * Field name for the description of an ad document.
      */
     const val ADS_FIELD_DESCRIPTION = "description"
-
-    /**
-     * Field name for the lowercase description of an ad document.
-     */
-    const val ADS_FIELD_DESCRIPTION_LOWERCASE = "description_lowercase"
 
     /**
      * Field name for the province of an ad document.
@@ -55,6 +45,16 @@ object Constants {
      * Field name for the image URL of an ad document.
      */
     const val ADS_FIELD_IMAGE = "img"
+
+    /**
+     * Field name for the title search array of an ad document.
+     */
+    const val ADS_FIELD_TITLE_SEARCH = "title_search"
+
+    /**
+     * Field name for the description search array of an ad document.
+     */
+    const val ADS_FIELD_DESCRIPTION_SEARCH = "description_search"
 
     /************************************************************
      ************************************************************

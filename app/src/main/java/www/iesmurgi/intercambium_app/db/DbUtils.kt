@@ -32,22 +32,25 @@ class DbUtils {
         }
 
         /**
-         * Retrieves the data of an ad and converts it into a HashMap.
+         * Retrieves the data of an ad and converts it into a [HashMap].
          *
          * @param ad The [Ad] object containing the data.
          * @return A [HashMap] containing the ad data with field names as keys.
          */
         fun getAdData(ad: Ad): HashMap<String, Any> {
+            val titleWords = ad.title.lowercase().split(" ")
+            val descriptionWords = ad.description.lowercase().split(" ")
+
             return hashMapOf(
                 Constants.ADS_FIELD_TITLE to ad.title,
-                Constants.ADS_FIELD_TITLE_LOWERCASE to ad.title.lowercase(),
                 Constants.ADS_FIELD_DESCRIPTION to ad.description,
-                Constants.ADS_FIELD_DESCRIPTION_LOWERCASE to ad.description.lowercase(),
                 Constants.ADS_FIELD_PROVINCE to ad.province,
                 Constants.ADS_FIELD_STATUS to ad.status,
                 Constants.ADS_FIELD_CREATED_AT to ad.createdAt,
                 Constants.ADS_FIELD_IMAGE to ad.imgUrl,
-                Constants.ADS_FIELD_AUTHOR to ad.author.email
+                Constants.ADS_FIELD_AUTHOR to ad.author.email,
+                Constants.ADS_FIELD_TITLE_SEARCH to titleWords,
+                Constants.ADS_FIELD_DESCRIPTION_SEARCH to descriptionWords
             )
         }
 
