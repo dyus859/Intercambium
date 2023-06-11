@@ -7,15 +7,34 @@
     tools:context=".ui.ConfigurationActivity">
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/siv_logo_configuration"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
+        android:id="@+id/iv_profile_picture"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_avatar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.1"
-        app:srcCompat="@drawable/logo_text2" />
+        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+        tools:ignore="ImageContrastCheck" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_edit_profile_picture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="155dp"
+        android:minWidth="0dp"
+        app:icon="@drawable/ic_baseline_edit_24"
+        app:iconPadding="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.017"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <TextView
         android:id="@+id/tv_email_configuration"
@@ -30,8 +49,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/siv_logo_configuration"
-        app:layout_constraintVertical_bias="0.103" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_profile_picture"
+        app:layout_constraintVertical_bias="0.15" />
 
     <TextView
         android:id="@+id/tv_password_configuration"
@@ -46,8 +65,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/siv_logo_configuration"
-        app:layout_constraintVertical_bias="0.203" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_email_configuration"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/tv_name_configuration"
@@ -85,6 +104,7 @@
         android:id="@+id/btn_edit_password_configuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/dialog_edit_password_title"
         android:minWidth="0dp"
         app:icon="@drawable/ic_baseline_edit_24"
         app:iconPadding="0dp"
@@ -92,13 +112,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/tv_password_configuration"
-        app:layout_constraintTop_toBottomOf="@+id/siv_logo_configuration"
-        app:layout_constraintVertical_bias="0.203" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_profile_picture"
+        app:layout_constraintVertical_bias="0.246" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_edit_name_configuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/dialog_edit_name_title"
         android:minWidth="0dp"
         app:icon="@drawable/ic_baseline_edit_24"
         app:iconPadding="0dp"
@@ -113,6 +134,7 @@
         android:id="@+id/btn_edit_age_configuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/dialog_edit_age"
         android:minWidth="0dp"
         app:icon="@drawable/ic_baseline_edit_24"
         app:iconPadding="0dp"
@@ -127,13 +149,25 @@
         android:id="@+id/btn_delete_account"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/delete_my_account"
         android:backgroundTint="@color/red"
+        android:text="@string/delete_my_account"
         app:icon="@drawable/ic_baseline_delete_forever_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_edit_age_configuration"
-        app:layout_constraintVertical_bias="0.8" />
+        app:layout_constraintVertical_bias="0.8"
+        tools:ignore="TextContrastCheck" />
+
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/pb_configuration"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

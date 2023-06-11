@@ -73,11 +73,11 @@ object Utils {
      * @param uri The [Uri] of the image.
      * @return The generated image path.
      */
-    fun getImgPath(context: Context, uri: Uri): String {
+    fun getImgPath(context: Context, uri: Uri, directory: String): String {
         // Generate a unique image ID
         val uniqueImageId = UUID.randomUUID().toString()
 
-        return (Constants.STORAGE_IMAGES_PATH
+        return (directory
                 + uniqueImageId
                 + "."
                 + getFileExtension(context, uri))

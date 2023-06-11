@@ -105,9 +105,14 @@ object Constants {
     const val MAX_DESCRIPTION_LENGTH = 256
 
     /**
-     * Path for storing images in the storage.
+     * Path for storing ads in the storage.
      */
-    const val STORAGE_IMAGES_PATH = "images/"
+    const val STORAGE_ADS_IMAGES_PATH = "ads/"
+
+    /**
+     * Path for storing users profile photo in the storage.
+     */
+    const val STORAGE_USERS_IMAGES_PATH = "users/"
 
     /************************************************************
      ************************************************************

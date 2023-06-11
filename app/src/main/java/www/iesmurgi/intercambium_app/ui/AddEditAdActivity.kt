@@ -8,7 +8,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NavUtils
@@ -41,33 +43,8 @@ class AddEditAdActivity : AppCompatActivity() {
     private var latestImgUri: Uri? = null
     private val previewImage by lazy { binding.ivImageAdd }
 
-    /**
-     * Called when the activity is created.
-     * This function initializes the activity and sets up the necessary components, such as the
-     *  layout, action bar, event listeners, and the province list.
-     */
-    private val selectImageFromGalleryResult = registerForActivityResult(
-        ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            latestImgUri = uri
-            previewImage.setImageURI(null)
-            previewImage.setImageURI(uri)
-        }
-    }
-
-    /**
-     * Initializes the options menu for the activity.
-     * This function inflates the menu layout and sets the title and icon for the save menu item.
-     */
-    private val takeImageResult = registerForActivityResult(
-        ActivityResultContracts.TakePicture()) { isSuccess ->
-        if (isSuccess) {
-            latestImgUri?.let { uri ->
-                previewImage.setImageURI(null)
-                previewImage.setImageURI(uri)
-            }
-        }
-    }
+    private lateinit var selectImageFromGalleryResult: ActivityResultLauncher<String>
+    private lateinit var takeImageResult: ActivityResultLauncher<Uri>
 
     // Stores if 'save' function can be used at the moment
     private var canSave = true
@@ -83,35 +60,10 @@ class AddEditAdActivity : AppCompatActivity() {
         binding = ActivityAddEditAdBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setProvincesList()
+        setLaunchers()
+        setActionBarProps()
         setListeners()
         getData()
-        setActionBarProps()
-    }
-
-    /**
-     * Sets up the action bar properties.
-     * This function sets up the title and display options for the action bar.
-     */
-    private fun setActionBarProps() {
-        // Return to the previous activity
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        // Set ActionBar title
-        supportActionBar?.title = if (!isEditing()) {
-            getString(R.string.publish_ad)
-        } else {
-            getString(R.string.edit_ad)
-        }
-    }
-
-    /**
-     * Checks if the activity is in editing mode.
-     *
-     * @return true if the activity is in editing mode, false otherwise.
-     */
-    private fun isEditing(): Boolean {
-        return this::ad.isInitialized
     }
 
     /**
@@ -161,16 +113,56 @@ class AddEditAdActivity : AppCompatActivity() {
         return intent
     }
 
+
     /**
-     * Sets up the province list for the activity.
-     * This function sets the adapter for the province autocomplete text view and handles the item
-     *  click event to store the selected province name.
+     * Sets up the action bar properties.
+     * This function sets up the title and display options for the action bar.
      */
-    private fun setProvincesList() {
-        binding.mactAdProvince.setAdapter(ProvinceAdapter(this, Province.provinceSource))
-        binding.mactAdProvince.setOnItemClickListener { parent, _, position, _ ->
-            val province = parent.adapter.getItem(position) as Province
-            selectedProvinceName = province.name
+    private fun setActionBarProps() {
+        // Return to the previous activity
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        // Set ActionBar title
+        supportActionBar?.title = if (!isEditing()) {
+            getString(R.string.publish_ad)
+        } else {
+            getString(R.string.edit_ad)
+        }
+    }
+
+    /**
+     * Checks if the activity is in editing mode.
+     *
+     * @return true if the activity is in editing mode, false otherwise.
+     */
+    private fun isEditing(): Boolean {
+        return this::ad.isInitialized
+    }
+
+    /**
+     * Sets up the activity result launchers for selecting an image from the gallery and taking
+     *  a picture.
+     * The selected or captured image URI is stored in the [latestImgUri] property, and the preview
+     *  image view is updated accordingly.
+     */
+    private fun setLaunchers() {
+        selectImageFromGalleryResult = registerForActivityResult(
+            ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                latestImgUri = uri
+                previewImage.setImageURI(null)
+                previewImage.setImageURI(uri)
+            }
+        }
+
+        takeImageResult = registerForActivityResult(
+            ActivityResultContracts.TakePicture()) { isSuccess ->
+            if (isSuccess) {
+                latestImgUri?.let { uri ->
+                    previewImage.setImageURI(null)
+                    previewImage.setImageURI(uri)
+                }
+            }
         }
     }
 
@@ -178,9 +170,16 @@ class AddEditAdActivity : AppCompatActivity() {
      * Sets up the event listeners for the activity.
      */
     private fun setListeners() {
-        // When users click on 'Edit image'
+        // When a user clicks on 'Edit image'
         binding.btnEditImageAd.setOnClickListener {
-            editImageOnClick()
+            onEditImageClick()
+        }
+
+        binding.mactAdProvince.setAdapter(ProvinceAdapter(this, Province.provinceSource))
+        // When a user clicks on a Province item
+        binding.mactAdProvince.setOnItemClickListener { parent, _, position, _ ->
+            val province = parent.adapter.getItem(position) as Province
+            selectedProvinceName = province.name
         }
     }
 
@@ -201,8 +200,11 @@ class AddEditAdActivity : AppCompatActivity() {
      * @param id The ID of the ad to load.
      */
     private fun loadAd(id: String) {
-        val db = Firebase.firestore
+        // Show the ProgressBar
+        binding.pbAddEditAd.visibility = View.VISIBLE
+        binding.pbAddEditAd.show()
 
+        val db = Firebase.firestore
         db.collection(Constants.COLLECTION_ADS)
             .document(id)
             .get()
@@ -224,6 +226,7 @@ class AddEditAdActivity : AppCompatActivity() {
                             .into(binding.ivImageAdd)
                     }
 
+                    // Hide the ProgressBar
                     binding.pbAddEditAd.hide()
 
                     selectedProvinceName = ad.province
@@ -243,11 +246,13 @@ class AddEditAdActivity : AppCompatActivity() {
      * Displays an error message and finishes the activity.
      */
     private fun handleFailure() {
+        // Hide the ProgressBar
         binding.pbAddEditAd.hide()
-        finish()
 
         val text = getString(R.string.ad_could_not_be_loaded)
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+
+        finish()
     }
 
     /**
@@ -298,7 +303,7 @@ class AddEditAdActivity : AppCompatActivity() {
      *  new photo. When the user selects an option, the corresponding function ([selectImageFromGallery]
      *  or [takeImage]) is called, and the dialog is dismissed.
      */
-    private fun editImageOnClick() {
+    private fun onEditImageClick() {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_image, null)
         val editImageBinding = DialogEditImageBinding.bind(view)
 
@@ -442,7 +447,8 @@ class AddEditAdActivity : AppCompatActivity() {
         } else {
             // Image is updated, need to upload the image first
 
-            val imgReference = Utils.getImgPath(this, latestImgUri!!)
+            val directory = Constants.STORAGE_ADS_IMAGES_PATH
+            val imgReference = Utils.getImgPath(this, latestImgUri!!, directory)
             val storageReference = FirebaseStorage.getInstance().getReference(imgReference)
 
             storageReference.putFile(latestImgUri!!)

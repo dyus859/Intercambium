@@ -18,7 +18,7 @@ data class User(
     var name: String = "",
     var age: Long? = null,
     val phoneNumber: String = "",
-    val photoUrl: String = "",
+    var photoUrl: String = "",
     val administrator: Boolean = false,
 ) : java.io.Serializable {
 
