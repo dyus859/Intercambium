@@ -1,24 +1,25 @@
 package www.iesmurgi.intercambium_app.ui
 
-import android.content.DialogInterface
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityConfigurationBinding
+import www.iesmurgi.intercambium_app.databinding.DialogConfirmationBinding
 import www.iesmurgi.intercambium_app.databinding.DialogEditImageBinding
+import www.iesmurgi.intercambium_app.databinding.DialogEditNameBinding
+import www.iesmurgi.intercambium_app.databinding.DialogEditPasswordBinding
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
@@ -94,131 +95,12 @@ class ConfigurationActivity : AppCompatActivity() {
      * Sets the listeners for the UI elements.
      */
     private fun setListeners() {
-        binding.btnEditProfilePicture.setOnClickListener { onEditProfilePictureClick() }
-        binding.btnEditPasswordConfiguration.setOnClickListener { onEditPasswordClick() }
-        binding.btnEditNameConfiguration.setOnClickListener { onEditNameClick() }
-        binding.btnEditAgeConfiguration.setOnClickListener { onEditAgeClick() }
-        binding.btnDeleteAccount.setOnClickListener { onDeleteAccountClick() }
-    }
-
-
-    /**
-     * Fetches the user's data and updates the UI.
-     */
-    private fun fetchData() {
-        val notSet = getString(R.string.value_not_set_configuration)
-
-        if (user.photoUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(user.photoUrl)
-                .into(binding.ivProfilePicture)
+        with(binding) {
+            btnEditProfilePicture.setOnClickListener { onEditProfilePictureClick() }
+            btnEditPasswordConfiguration.setOnClickListener { onEditPasswordClick() }
+            btnEditNameConfiguration.setOnClickListener { onEditNameClick() }
+            btnDeleteAccount.setOnClickListener { onDeleteAccountClick() }
         }
-
-        binding.tvEmailConfiguration.text = getString(R.string.label_email_configuration, user.email)
-        binding.tvPasswordConfiguration.text = getString(R.string.label_password_configuration)
-
-        if (user.name.isNotEmpty()) {
-            binding.tvNameConfiguration.text = getString(R.string.label_name_configuration, user.name)
-        } else {
-            binding.tvNameConfiguration.text = getString(R.string.label_name_configuration, notSet)
-        }
-
-        if (user.age != 0L) {
-            binding.tvAgeConfiguration.text = getString(R.string.label_age_configuration, user.age.toString())
-        } else {
-            binding.tvAgeConfiguration.text = getString(R.string.label_age_configuration, notSet)
-        }
-    }
-
-    /**
-     * Handles the click event for the delete account button.
-     */
-    private fun onDeleteAccountClick() {
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setTitle(getString(R.string.dialog_delete_account_title))
-        alertDialogBuilder.setIcon(R.mipmap.ic_launcher)
-        alertDialogBuilder.setPositiveButton(getString(android.R.string.ok)) { _: DialogInterface, _: Int ->
-            deleteAccount()
-        }
-        alertDialogBuilder.setNegativeButton(getString(android.R.string.cancel), null)
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
-    }
-
-
-    /**
-     * Deletes the user's account and associated data.
-     */
-    private fun deleteAccount() {
-        // Delete Firebase Firestore information associated to the account
-        val db = Firebase.firestore
-        val usersCollections = db.collection(Constants.COLLECTION_USERS)
-        val userDocument = usersCollections.document(user.email)
-
-        // Delete ads associated with the user's email
-        userDocument.delete().addOnSuccessListener {
-            val adsCollection = db.collection(Constants.COLLECTION_ADS)
-            val adsQuery = adsCollection.whereEqualTo(Constants.ADS_FIELD_AUTHOR, user.email)
-
-            adsQuery.get().addOnSuccessListener { adsDocuments ->
-                for (adDocument in adsDocuments) {
-                    val adId = adDocument.id
-                    val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE)
-
-                    // Delete each ad document
-                    adsCollection.document(adId).delete()
-
-                    // Delete each ad image
-                    if (adImgUrl != null) {
-                        Utils.deleteFirebaseImage(adImgUrl)
-                    }
-                }
-            }
-        }
-
-        // Delete Firebase Storage information associated to the account
-        if (user.photoUrl.isNotEmpty()) {
-            Utils.deleteFirebaseImage(user.photoUrl)
-        }
-
-        // Delete Firebase Authentication information
-        FirebaseAuth.getInstance().currentUser?.delete()?.addOnSuccessListener {
-            signOut()
-        }
-    }
-
-    /**
-     * Signs out the user and finishes the activity.
-     */
-    private fun signOut() {
-        FirebaseAuth.getInstance().signOut()
-        finish()
-    }
-
-    /**
-     * Creates and shows an [AlertDialog] with the specified title, view, and optional onSuccess callback.
-     *
-     * @param title The title of the [AlertDialog].
-     * @param view The View to be displayed within the [AlertDialog].
-     * @param onSuccess An optional callback function to be executed when the positive button is clicked.
-     *                  It is invoked with no arguments.
-     * @return The created [AlertDialog] instance.
-     */
-    private fun createAlertDialog(title: String, view: View, onSuccess: (() -> Unit)?): AlertDialog {
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setView(view)
-        alertDialogBuilder.setTitle(title)
-        alertDialogBuilder.setIcon(R.mipmap.ic_launcher)
-        alertDialogBuilder.setPositiveButton(getString(android.R.string.ok)) { _: DialogInterface, _: Int ->
-            if (onSuccess != null) {
-                onSuccess()
-            }
-        }
-        alertDialogBuilder.setNegativeButton(getString(android.R.string.cancel), null)
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
-
-        return alertDialog
     }
 
     /**
@@ -226,15 +108,56 @@ class ConfigurationActivity : AppCompatActivity() {
      */
     private fun onEditPasswordClick() {
         val title = getString(R.string.dialog_edit_password_title)
-        val etPassword = EditText(this).apply {
-            hint = getString(R.string.password_hint)
-            inputType = InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
-        }
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_password, null)
+        val editPasswordBinding = DialogEditPasswordBinding.bind(view)
 
-        createAlertDialog(title, etPassword) {
-            if (etPassword.text.isNotEmpty()) {
-                updatePassword(etPassword.text.toString())
+        val alertDialog = Utils.createAlertDialog(this, title, view)
+
+        with(editPasswordBinding) {
+            btnCancelPassword.setOnClickListener { alertDialog.dismiss() }
+            btnApplyPassword.setOnClickListener {
+                val currentPassword = tieUserCurrentPassword.text.toString()
+                val newPassword = tieUserNewPassword.text.toString()
+                val required = getString(R.string.required)
+
+                if (currentPassword.isEmpty()) {
+                    tieUserCurrentPassword.error = required
+                    tieUserCurrentPassword.requestFocus()
+                } else if (newPassword.isEmpty()) {
+                    tieUserNewPassword.error = required
+                    tieUserNewPassword.requestFocus()
+                } else {
+                    validateCurrentPassword(currentPassword) { isValid ->
+                        if (isValid) {
+                            updatePassword(newPassword)
+                        } else {
+                            val msg = getString(R.string.error_edit_password_invalid_current_password)
+                            tieUserCurrentPassword.error = msg
+                            tieUserCurrentPassword.requestFocus()
+                        }
+                    }
+                }
             }
+        }
+    }
+
+    /**
+     * Validates the provided current password.
+     *
+     * @param currentPassword The current password to be validated.
+     * @param callback The callback function to be invoked with the validation result.
+     *                 It receives a boolean value indicating whether the current password is valid or not.
+     */
+    private fun validateCurrentPassword(currentPassword: String, callback: (isValid: Boolean) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val credentials = EmailAuthProvider.getCredential(user.email!!, currentPassword)
+            user.reauthenticate(credentials)
+                .addOnCompleteListener { task ->
+                    callback(task.isSuccessful)
+                }
+        } else {
+            callback(false)
         }
     }
 
@@ -260,34 +183,25 @@ class ConfigurationActivity : AppCompatActivity() {
      */
     private fun onEditNameClick() {
         val title = getString(R.string.dialog_edit_name_title)
-        val etName = EditText(this).apply {
-            hint = getString(R.string.dialog_edit_name_hint)
-            isSingleLine = true
-        }
 
-        createAlertDialog(title, etName) {
-            if (etName.text.isNotEmpty()) {
-                updateValueDB(Constants.USERS_FIELD_NAME, etName.text.toString().trim())
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_name, null)
+        val editNameBinding = DialogEditNameBinding.bind(view)
+
+        val alertDialog = Utils.createAlertDialog(this, title, view)
+
+        with(editNameBinding) {
+            btnCancelName.setOnClickListener { alertDialog.dismiss() }
+            btnApplyName.setOnClickListener {
+                val text = tieUserName.text.toString().trim()
+                val required = getString(R.string.required)
+
+                if (text.isEmpty()) {
+                    tieUserName.error = required
+                    tieUserName.requestFocus()
+                } else {
+                    updateValueDB(Constants.USERS_FIELD_NAME, text)
+                }
             }
-        }
-    }
-
-    /**
-     * Handles the click event for the edit age button.
-     */
-    private fun onEditAgeClick() {
-        val title = getString(R.string.dialog_edit_age)
-        val npAge = NumberPicker(this)
-        npAge.minValue = 1
-        npAge.maxValue = 120
-
-        if (user.age != 0L) {
-            // Set current age for the NumberPicker
-            npAge.value = Math.toIntExact(user.age!!)
-        }
-
-        createAlertDialog(title, npAge) {
-            updateValueDB(Constants.USERS_FIELD_AGE, npAge.value.toLong())
         }
     }
 
@@ -298,19 +212,13 @@ class ConfigurationActivity : AppCompatActivity() {
      * @param field The field to update.
      * @param value The new value.
      */
-    private fun updateValueDB(field: String, value: Any) {
+    private fun updateValueDB(field: String, value: String) {
         val db = Firebase.firestore
         db.collection(Constants.COLLECTION_USERS)
             .document(user.email)
             .update(field, value)
             .addOnSuccessListener {
-                if (field == Constants.USERS_FIELD_NAME) {
-                    user.name = value as String
-                } else if (field == Constants.USERS_FIELD_AGE) {
-                    user.age = value as Long
-                }
-
-                // Update activity values
+                user.name = value
                 fetchData()
             }
     }
@@ -326,18 +234,20 @@ class ConfigurationActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_image, null)
         val editImageBinding = DialogEditImageBinding.bind(view)
 
-        val alertDialog = createAlertDialog(title, view, null)
+        val alertDialog = Utils.createAlertDialog(this, title, view)
 
-        // User has selected 'Gallery'
-        editImageBinding.tvChooseFromGallery.setOnClickListener {
-            selectImageFromGallery()
-            alertDialog.dismiss()
-        }
+        with(editImageBinding) {
+            // User has selected 'Gallery'
+            tvChooseFromGallery.setOnClickListener {
+                selectImageFromGallery()
+                alertDialog.dismiss()
+            }
 
-        // User has selected 'Take a photo'
-        editImageBinding.tvTakeAPhoto.setOnClickListener {
-            takeImage()
-            alertDialog.dismiss()
+            // User has selected 'Take a photo'
+            tvTakeAPhoto.setOnClickListener {
+                takeImage()
+                alertDialog.dismiss()
+            }
         }
     }
 
@@ -425,5 +335,85 @@ class ConfigurationActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 user.photoUrl = url
             }
+    }
+
+    /**
+     * Fetches the user's data and updates the UI.
+     */
+    private fun fetchData() {
+        with(binding) {
+            tvEmailConfiguration.text = user.email
+            tvNameConfiguration.text = user.name
+
+            Glide.with(this@ConfigurationActivity)
+                .load(user.photoUrl.takeIf { it.isNotEmpty() })
+                .placeholder(R.drawable.default_avatar)
+                .into(ivProfilePicture)
+        }
+    }
+
+    /**
+     * Handles the click event for the delete account button.
+     */
+    private fun onDeleteAccountClick() {
+        val title = getString(R.string.dialog_delete_account_title)
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
+        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
+
+        val alertDialog = Utils.createAlertDialog(this, title, view)
+
+        with(dialogConfirmationBinding) {
+            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
+            btnConfirmAction.setOnClickListener { deleteAccount() }
+        }
+    }
+
+    /**
+     * Deletes the user's account and associated data.
+     */
+    private fun deleteAccount() {
+        // Delete Firebase Firestore information associated to the account
+        val db = Firebase.firestore
+        val usersCollections = db.collection(Constants.COLLECTION_USERS)
+        val userDocument = usersCollections.document(user.email)
+
+        // Delete ads associated with the user's email
+        userDocument.delete().addOnSuccessListener {
+            val adsCollection = db.collection(Constants.COLLECTION_ADS)
+            val adsQuery = adsCollection.whereEqualTo(Constants.ADS_FIELD_AUTHOR, user.email)
+
+            adsQuery.get().addOnSuccessListener { adsDocuments ->
+                for (adDocument in adsDocuments) {
+                    val adId = adDocument.id
+                    val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE)
+
+                    // Delete each ad document
+                    adsCollection.document(adId).delete()
+
+                    // Delete each ad image
+                    if (adImgUrl != null) {
+                        Utils.deleteFirebaseImage(adImgUrl)
+                    }
+                }
+            }
+        }
+
+        // Delete Firebase Storage information associated to the account
+        if (user.photoUrl.isNotEmpty()) {
+            Utils.deleteFirebaseImage(user.photoUrl)
+        }
+
+        // Delete Firebase Authentication information
+        FirebaseAuth.getInstance().currentUser?.delete()?.addOnSuccessListener {
+            signOut()
+        }
+    }
+
+    /**
+     * Signs out the user and finishes the activity.
+     */
+    private fun signOut() {
+        FirebaseAuth.getInstance().signOut()
+        finish()
     }
 }

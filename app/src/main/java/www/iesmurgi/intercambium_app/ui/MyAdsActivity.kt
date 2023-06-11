@@ -6,12 +6,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.databinding.ActivityMyAdsBinding
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.models.adapters.AdAdapter
@@ -109,9 +109,10 @@ class MyAdsActivity : AppCompatActivity() {
 
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
-        adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
+        val query = adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
             .whereEqualTo(Constants.ADS_FIELD_AUTHOR, user.email)
-            .get()
+
+        query.get()
             .addOnFailureListener {
                 handleNoAdsMsg()
             }
@@ -125,25 +126,7 @@ class MyAdsActivity : AppCompatActivity() {
                 }
 
                 for (adDocument in adDocuments) {
-                    val adId = adDocument.id
-                    val adTitle =
-                        adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
-                    val adDesc =
-                        adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
-                    val adProvince =
-                        adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
-                    val adStatus =
-                        adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
-                    var adCreatedAt =
-                        adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
-                    val adImgUrl =
-                        adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
-
-                    if (adCreatedAt == null) {
-                        adCreatedAt = Timestamp.now()
-                    }
-
-                    val ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt, adImgUrl, user)
+                    val ad = adDocument.toAd(user)
                     ad.visible = Utils.isAdVisibleForUser(ad)
 
                     // Add the add to the list

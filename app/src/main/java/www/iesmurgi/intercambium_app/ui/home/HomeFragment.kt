@@ -8,15 +8,15 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.FragmentHomeBinding
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
-import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.models.adapters.AdAdapter
 import www.iesmurgi.intercambium_app.ui.AdActivity
 import www.iesmurgi.intercambium_app.ui.AddEditAdActivity
@@ -217,8 +217,6 @@ class HomeFragment : Fragment() {
             adapter.adList.clear()
         }
 
-        println("processQueryResults $adDocuments")
-
         val db = Firebase.firestore
         for (adDocument in adDocuments) {
             val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
@@ -228,36 +226,8 @@ class HomeFragment : Fragment() {
                 .addOnSuccessListener { userDocument ->
                     // If this account doesn't exist anymore, don't show the ad
                     if (userDocument.exists()) {
-                        val userEmail = userDocument.id
-                        val userName =
-                            userDocument.getString(Constants.USERS_FIELD_NAME).toString()
-                        val userAge =
-                            userDocument.getLong(Constants.USERS_FIELD_AGE)
-                        val userPhoneNumber =
-                            userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
-                        val userPhotoUrl =
-                            userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
-
-                        val adId = adDocument.id
-                        val adTitle =
-                            adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
-                        val adDesc =
-                            adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
-                        val adProvince =
-                            adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
-                        val adStatus =
-                            adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
-                        var adCreatedAt =
-                            adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
-                        val adImgUrl =
-                            adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
-
-                        if (adCreatedAt == null) {
-                            adCreatedAt = Timestamp.now()
-                        }
-
-                        val user = User(userEmail, userName, userAge, userPhoneNumber, userPhotoUrl)
-                        val ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt, adImgUrl, user)
+                        val user = userDocument.toUser()
+                        val ad = adDocument.toAd(user)
                         ad.visible = Utils.isAdVisibleForUser(ad)
 
                         adapter.notifyItemInserted(adapter.adList.size)

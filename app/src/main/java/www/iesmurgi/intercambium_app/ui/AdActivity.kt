@@ -1,23 +1,23 @@
 package www.iesmurgi.intercambium_app.ui
 
 import android.app.Activity
-import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityAdBinding
+import www.iesmurgi.intercambium_app.databinding.DialogConfirmationBinding
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
-import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
 import www.iesmurgi.intercambium_app.utils.Utils
@@ -100,46 +100,20 @@ class AdActivity : AppCompatActivity() {
                     val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
 
                     if (author.isNotEmpty()) {
-                        val usersCollection = db.collection(Constants.COLLECTION_USERS)
-                        val usersDocument = usersCollection.document(author)
-
-                        usersDocument.get()
+                        db.collection(Constants.COLLECTION_USERS)
+                            .document(author)
+                            .get()
                             .addOnSuccessListener { userDocument ->
                                 if (userDocument.exists()) {
-                                    val userEmail = userDocument.id
-                                    val userName =
-                                        userDocument.getString(Constants.USERS_FIELD_NAME).toString()
-                                    val userAge =
-                                        userDocument.getLong(Constants.USERS_FIELD_AGE)
-                                    val userPhoneNumber =
-                                        userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
-                                    val userPhotoUrl =
-                                        userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
-
-                                    val adId = adDocument.id
-                                    val adTitle =
-                                        adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
-                                    val adDesc =
-                                        adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
-                                    val adProvince =
-                                        adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
-                                    val adStatus =
-                                        adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
-                                    var adCreatedAt =
-                                        adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
-                                    val adImgUrl =
-                                        adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
-
-                                    if (adCreatedAt == null) {
-                                        adCreatedAt = Timestamp.now()
-                                    }
-
-                                    val user = User(userEmail, userName, userAge, userPhoneNumber, userPhotoUrl)
-                                    val ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt,
-                                        adImgUrl, user)
-
+                                    val user = userDocument.toUser()
+                                    val ad = adDocument.toAd(user)
                                     handleSuccess(ad)
+                                } else {
+                                    handleFailure()
                                 }
+                            }
+                            .addOnFailureListener {
+                                handleFailure()
                             }
                     } else {
                         handleFailure()
@@ -178,43 +152,35 @@ class AdActivity : AppCompatActivity() {
         adId = ad.id
         adImgUrl = ad.imgUrl
 
-        // Render images
-        binding.ivAdProvinceInfo.visibility = View.VISIBLE
-        binding.sivItemAdUserPhotoInfo.visibility = View.VISIBLE
+        with(binding) {
+            // Render images
+            ivAdProvinceInfo.visibility = View.VISIBLE
+            sivItemAdUserPhotoInfo.visibility = View.VISIBLE
 
-        // Set actions layout visibility
-        handleActionsVisibility(ad.status)
+            // Set actions layout visibility
+            handleActionsVisibility(ad.status)
 
-        // Set content
-        binding.tvItemAdLocation.text = ad.province
-        binding.tvItemAdTitleInfo.text = ad.title
-        binding.tvItemAdDescriptionInfo.text = ad.description
-        binding.tvItemAdUserNameInfo.text = ad.author.name
+            // Set content
+            tvItemAdLocation.text = ad.province
+            tvItemAdTitleInfo.text = ad.title
+            tvItemAdDescriptionInfo.text = ad.description
+            tvItemAdUserNameInfo.text = ad.author.name
 
-        // Set chat button visibility
-        val currentUser = SharedData.getUser().value!!
-        if (ad.author.email == currentUser.email) {
-            binding.btnOpenChatAd.visibility = View.GONE
-        } else {
-            binding.btnOpenChatAd.visibility = View.VISIBLE
-        }
+            // Set chat button visibility
+            val currentUser = SharedData.getUser().value!!
+            btnOpenChatAd.visibility = if (ad.author.email == currentUser.email) View.GONE else View.VISIBLE
 
-        // Set ad img
-        if (ad.imgUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(ad.imgUrl)
-                .into(binding.ivItemAdImageInfo)
-        } else {
-            binding.ivItemAdImageInfo.setImageResource(R.drawable.no_image)
-        }
+            // Set ad image
+            Glide.with(this@AdActivity)
+                .load(ad.imgUrl.takeIf { it.isNotEmpty() })
+                .placeholder(R.drawable.no_image)
+                .into(ivItemAdImageInfo)
 
-        // Set user's profile picture
-        if (ad.author.photoUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(ad.author.photoUrl)
-                .into(binding.sivItemAdUserPhotoInfo)
-        } else {
-            binding.sivItemAdUserPhotoInfo.setImageResource(R.drawable.default_avatar)
+            // Set user's profile picture
+            Glide.with(this@AdActivity)
+                .load(ad.author.photoUrl.takeIf { it.isNotEmpty() })
+                .placeholder(R.drawable.default_avatar)
+                .into(sivItemAdUserPhotoInfo)
         }
     }
 
@@ -224,29 +190,26 @@ class AdActivity : AppCompatActivity() {
     private fun handleActionsVisibility(status: String) {
         val user = SharedData.getUser().value!!
 
-        if (user.administrator) {
-            // Set layout visible
-            binding.llActionsAd.visibility = View.VISIBLE
+        with(binding) {
+            if (user.administrator) {
+                // Set layout visible
+                llActionsAd.visibility = View.VISIBLE
 
-            // Handle buttons visibility which depends on the current ad status
-            if (status == Constants.AD_STATUS_IN_REVISION) {
-                binding.btnPublishAd.visibility = View.VISIBLE
-                binding.btnHideAd.visibility = View.GONE
-            } else if (status == Constants.AD_STATUS_PUBLISHED) {
-                binding.btnPublishAd.visibility = View.GONE
-                binding.btnHideAd.visibility = View.VISIBLE
+                // Handle buttons visibility which depends on the current ad status
+                btnPublishAd.visibility = if (status == Constants.AD_STATUS_IN_REVISION) View.VISIBLE else View.GONE
+                btnHideAd.visibility = if (status == Constants.AD_STATUS_PUBLISHED) View.VISIBLE else View.GONE
+
+                // Edit and Delete are always visible
+                btnEditAd.visibility = View.VISIBLE
+                btnDeleteAd.visibility = View.VISIBLE
+            } else {
+                // Not an administrator user cannot see the action buttons
+                llActionsAd.visibility = View.GONE
             }
 
-            // Edit and Delete are always visible
-            binding.btnEditAd.visibility = View.VISIBLE
-            binding.btnDeleteAd.visibility = View.VISIBLE
-        } else {
-            // Not an administrator user cannot see the action buttons
-            binding.llActionsAd.visibility = View.GONE
+            // Show 'Open Chat' button
+            btnOpenChatAd.visibility = View.VISIBLE
         }
-
-        // Show 'Open Chat' button
-        binding.btnOpenChatAd.visibility = View.VISIBLE
     }
 
 
@@ -254,51 +217,52 @@ class AdActivity : AppCompatActivity() {
      * Sets the click listeners for all buttons in the activity.
      */
     private fun setListeners() {
-        binding.btnPublishAd.setOnClickListener { onPublishClick() }
-        binding.btnHideAd.setOnClickListener { onHideClick() }
-        binding.btnEditAd.setOnClickListener { onEditClick() }
-        binding.btnDeleteAd.setOnClickListener { onDeleteClick() }
-//        binding.btnOpenChatAd.setOnClickListener { onOpenChatClick()}
-    }
-
-    /**
-     * Creates a confirmation [AlertDialog] with the specified title and success callback.
-     *
-     * @param title The title of the alert dialog.
-     * @param onSuccess The callback function to be called when the user confirms the action.
-     */
-    private fun createConfirmationAlertDialog(title: String, onSuccess: () -> Unit) {
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setTitle(title)
-        alertDialogBuilder.setIcon(R.mipmap.ic_launcher)
-        alertDialogBuilder.setPositiveButton(getString(android.R.string.ok)) { _: DialogInterface, _: Int ->
-            onSuccess()
+        with(binding) {
+            btnPublishAd.setOnClickListener { onPublishClick() }
+            btnHideAd.setOnClickListener { onHideClick() }
+            btnEditAd.setOnClickListener { onEditClick() }
+            btnDeleteAd.setOnClickListener { onDeleteClick() }
+//            btnOpenChatAd.setOnClickListener { onOpenChatClick()}
         }
-        alertDialogBuilder.setNegativeButton(getString(android.R.string.cancel), null)
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
     }
 
     /**
      * Called when the user clicks on the 'Publish ad' button.
      */
     private fun onPublishClick() {
+        if (adId.isEmpty()) {
+            return
+        }
+
         val title = getString(R.string.dialog_publish_ad)
-        createConfirmationAlertDialog(title) { setNewAdStatus(adId, Constants.AD_STATUS_PUBLISHED) }
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
+        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
+
+        val alertDialog = Utils.createAlertDialog(this, title, view)
+
+        with(dialogConfirmationBinding) {
+            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
+            btnConfirmAction.setOnClickListener { setNewAdStatus(adId, Constants.AD_STATUS_PUBLISHED) }
+        }
     }
 
     /**
      * Called when the user clicks on the 'Hide ad' button.
      */
     private fun onHideClick() {
-        if (adId.isNotEmpty()) {
-            val title = getString(R.string.dialog_hide_ad)
-            createConfirmationAlertDialog(title) {
-                setNewAdStatus(
-                    adId,
-                    Constants.AD_STATUS_IN_REVISION
-                )
-            }
+        if (adId.isEmpty()) {
+            return
+        }
+
+        val title = getString(R.string.dialog_hide_ad)
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
+        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
+
+        val alertDialog = Utils.createAlertDialog(this, title, view)
+
+        with(dialogConfirmationBinding) {
+            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
+            btnConfirmAction.setOnClickListener { setNewAdStatus(adId, Constants.AD_STATUS_IN_REVISION) }
         }
     }
 
@@ -318,9 +282,19 @@ class AdActivity : AppCompatActivity() {
      * Called when the user clicks on the 'Delete ad' button.
      */
     private fun onDeleteClick() {
-        if (adId.isNotEmpty()) {
-            val title = getString(R.string.dialog_delete_ad)
-            createConfirmationAlertDialog(title) { deleteAd(adId, adImgUrl) }
+        if (adId.isEmpty()) {
+            return
+        }
+
+        val title = getString(R.string.dialog_delete_ad)
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
+        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
+
+        val alertDialog = Utils.createAlertDialog(this, title, view)
+
+        with(dialogConfirmationBinding) {
+            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
+            btnConfirmAction.setOnClickListener { deleteAd(adId, adImgUrl) }
         }
     }
 

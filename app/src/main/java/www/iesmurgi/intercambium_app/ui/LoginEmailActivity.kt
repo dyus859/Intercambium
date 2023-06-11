@@ -175,8 +175,6 @@ class LoginEmailActivity : AppCompatActivity() {
      * Finishes the [LoginEmailActivity] and returns to the previous activity.
      */
     private fun finishLoginActivity() {
-//        val intent = Intent()
-//        setResult(Activity.RESULT_OK, intent)
         finish()
     }
 }

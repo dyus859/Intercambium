@@ -71,11 +71,6 @@ object Constants {
     const val USERS_FIELD_NAME = "name"
 
     /**
-     * Field name for the age of a user document.
-     */
-    const val USERS_FIELD_AGE = "age"
-
-    /**
      * Field name for the phone number of a user document.
      */
     const val USERS_FIELD_PHONE_NUMBER = "phoneNumber"

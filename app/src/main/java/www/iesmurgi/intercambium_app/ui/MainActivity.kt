@@ -12,6 +12,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityMainBinding
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
@@ -64,28 +65,15 @@ class MainActivity : AppCompatActivity() {
             val user = firebaseAuth.currentUser
 
             if (user != null) {
+                val email = user.email.toString()
+
                 val db = Firebase.firestore
                 val usersCollection = db.collection(Constants.COLLECTION_USERS)
-                val email = user.email.toString()
                 val userDocument = usersCollection.document(email)
-                userDocument.get()
-                    .addOnSuccessListener { document ->
-                        var administrator = document.getBoolean(Constants.USERS_FIELD_ADMINISTRATOR)
-                        if (administrator == null) {
-                            administrator = false
-                        }
 
-                        val age = document.getLong(Constants.USERS_FIELD_AGE)
-
-                        SharedData.setUser(User(
-                            email,
-                            document.getString(Constants.USERS_FIELD_NAME).toString(),
-                            age,
-                            document.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString(),
-                            document.getString(Constants.USERS_FIELD_PHOTO_URL).toString(),
-                            administrator
-                        ))
-                    }
+                userDocument.get().addOnSuccessListener { document ->
+                    SharedData.setUser(document.toUser())
+                }
             } else {
                 SharedData.setUser(User())
             }

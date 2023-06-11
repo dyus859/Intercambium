@@ -15,7 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NavUtils
 import com.bumptech.glide.Glide
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -23,6 +22,8 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityAddEditAdBinding
 import www.iesmurgi.intercambium_app.databinding.DialogEditImageBinding
 import www.iesmurgi.intercambium_app.db.DbUtils
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
+import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.Province
 import www.iesmurgi.intercambium_app.models.User
@@ -207,6 +208,7 @@ class AddEditAdActivity : AppCompatActivity() {
         binding.pbAddEditAd.show()
 
         val db = Firebase.firestore
+
         db.collection(Constants.COLLECTION_ADS)
             .document(id)
             .get()
@@ -215,46 +217,20 @@ class AddEditAdActivity : AppCompatActivity() {
                     val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
 
                     if (author.isNotEmpty()) {
-                        val usersCollection = db.collection(Constants.COLLECTION_USERS)
-                        val usersDocument = usersCollection.document(author)
-
-                        usersDocument.get()
+                        db.collection(Constants.COLLECTION_USERS)
+                            .document(author)
+                            .get()
                             .addOnSuccessListener { userDocument ->
                                 if (userDocument.exists()) {
-                                    val userEmail = userDocument.id
-                                    val userName =
-                                        userDocument.getString(Constants.USERS_FIELD_NAME).toString()
-                                    val userAge =
-                                        userDocument.getLong(Constants.USERS_FIELD_AGE)
-                                    val userPhoneNumber =
-                                        userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
-                                    val userPhotoUrl =
-                                        userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
-
-                                    val adId = adDocument.id
-                                    val adTitle =
-                                        adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
-                                    val adDesc =
-                                        adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
-                                    val adProvince =
-                                        adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
-                                    val adStatus =
-                                        adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
-                                    var adCreatedAt =
-                                        adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
-                                    val adImgUrl =
-                                        adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
-
-                                    if (adCreatedAt == null) {
-                                        adCreatedAt = Timestamp.now()
-                                    }
-
-                                    val user = User(userEmail, userName, userAge, userPhoneNumber, userPhotoUrl)
-                                    ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt,
-                                        adImgUrl, user)
-
+                                    val user = userDocument.toUser()
+                                    val ad = adDocument.toAd(user)
                                     handleSuccess(ad)
+                                } else {
+                                    handleFailure()
                                 }
+                            }
+                            .addOnFailureListener {
+                                handleFailure()
                             }
                     } else {
                         handleFailure()

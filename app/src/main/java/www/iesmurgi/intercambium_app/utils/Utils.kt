@@ -1,13 +1,16 @@
 package www.iesmurgi.intercambium_app.utils
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.findNavController
 import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.BuildConfig
+import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.models.Ad
 import java.io.File
 import java.util.*
@@ -41,7 +44,7 @@ object Utils {
      * @param uri The [Uri] of the file.
      * @return The file extension or `null` if not found.
      */
-    fun getFileExtension(context: Context, uri: Uri): String? {
+    private fun getFileExtension(context: Context, uri: Uri): String? {
         val document = DocumentFile.fromSingleUri(context, uri)
         return document?.name?.let { name ->
             val extension = name.substringAfterLast(".", "")
@@ -107,5 +110,21 @@ object Utils {
 
         // Delete the image file
         imageRef.delete()
+    }
+
+    /**
+     * Creates a confirmation [AlertDialog] with the specified title and success callback.
+     *
+     * @param title The title of the alert dialog.
+     */
+    fun createAlertDialog(activity: Activity, title: String, view: View): AlertDialog {
+        val alertDialogBuilder = AlertDialog.Builder(activity)
+        alertDialogBuilder.setTitle(title)
+        alertDialogBuilder.setView(view)
+        alertDialogBuilder.setIcon(R.mipmap.ic_launcher)
+        val alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+
+        return alertDialog
     }
 }

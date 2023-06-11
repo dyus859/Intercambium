@@ -5,7 +5,6 @@ package www.iesmurgi.intercambium_app.models
  *
  * @property email The email address of the user.
  * @property name The name of the user.
- * @property age The age of the user.
  * @property phoneNumber The phone number of the user.
  * @property photoUrl The URL of the user's photo.
  * @property administrator Indicates if the user is an administrator.
@@ -16,7 +15,6 @@ package www.iesmurgi.intercambium_app.models
 data class User(
     val email: String = "",
     var name: String = "",
-    var age: Long? = null,
     val phoneNumber: String = "",
     var photoUrl: String = "",
     val administrator: Boolean = false,

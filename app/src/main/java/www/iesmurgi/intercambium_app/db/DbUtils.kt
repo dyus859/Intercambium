@@ -1,9 +1,12 @@
 package www.iesmurgi.intercambium_app.db
 
 import com.firebase.ui.auth.IdpResponse
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.models.Ad
+import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import java.util.HashMap
 
@@ -23,7 +26,6 @@ class DbUtils {
             return hashMapOf(
                 Constants.USERS_FIELD_ADMINISTRATOR to false,
                 Constants.USERS_FIELD_NAME to "",
-                Constants.USERS_FIELD_AGE to 0,
                 Constants.USERS_FIELD_PHONE_NUMBER to "",
                 Constants.USERS_FIELD_PHOTO_URL to "",
             )
@@ -92,6 +94,39 @@ class DbUtils {
             db.collection(Constants.COLLECTION_USERS)
                 .document(email)
                 .set(data)
+        }
+
+        /**
+         * Extension function to convert a [DocumentSnapshot] to a [User] object.
+         *
+         * @return The converted [User] object.
+         */
+        fun DocumentSnapshot.toUser(): User {
+            val email = id
+            val name = getString(Constants.USERS_FIELD_NAME).orEmpty()
+            val phoneNumber = getString(Constants.USERS_FIELD_PHONE_NUMBER).orEmpty()
+            val photoUrl = getString(Constants.USERS_FIELD_PHOTO_URL).orEmpty()
+            val isAdministrator = getBoolean(Constants.USERS_FIELD_ADMINISTRATOR) ?: false
+
+            return User(email, name, phoneNumber, photoUrl, isAdministrator)
+        }
+
+        /**
+         * Extension function to convert a [DocumentSnapshot] to an [Ad] object.
+         *
+         * @param author The [User] object representing the author of the [Ad].
+         * @return The converted [Ad] object.
+         */
+        fun DocumentSnapshot.toAd(author: User): Ad {
+            val id = id
+            val title = getString(Constants.ADS_FIELD_TITLE).orEmpty()
+            val description = getString(Constants.ADS_FIELD_DESCRIPTION).orEmpty()
+            val province = getString(Constants.ADS_FIELD_PROVINCE).orEmpty()
+            val status = getString(Constants.ADS_FIELD_STATUS).orEmpty()
+            val createdAt = getTimestamp(Constants.ADS_FIELD_CREATED_AT) ?: Timestamp.now()
+            val imgUrl = getString(Constants.ADS_FIELD_IMAGE).orEmpty()
+
+            return Ad(id, title, description, province, status, createdAt, imgUrl, author)
         }
     }
 }
