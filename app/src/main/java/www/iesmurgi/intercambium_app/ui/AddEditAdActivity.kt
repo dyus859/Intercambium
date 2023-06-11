@@ -423,7 +423,13 @@ class AddEditAdActivity : AppCompatActivity() {
         // Disable saving option for now
         canSave = false
 
-        val tempAd = Ad(ad.id, title, description, selectedProvinceName)
+        val tempAdId = if (isEditing()) {
+            ad.id
+        } else {
+            ""
+        }
+
+        val tempAd = Ad(tempAdId, title, description, selectedProvinceName)
         tempAd.imgUrl = ad.imgUrl
         tempAd.author = User(SharedData.getUser().value!!)
 
