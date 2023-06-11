@@ -1,8 +1,6 @@
 package www.iesmurgi.intercambium_app.ui
 
-import android.app.Activity
 import android.content.DialogInterface
-import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -155,13 +153,38 @@ class ConfigurationActivity : AppCompatActivity() {
      * Deletes the user's account and associated data.
      */
     private fun deleteAccount() {
-        // Delete associated data to the email
+        // Delete Firebase Firestore information associated to the account
         val db = Firebase.firestore
-        db.collection(Constants.COLLECTION_USERS)
-            .document(user.email)
-            .delete()
+        val usersCollections = db.collection(Constants.COLLECTION_USERS)
+        val userDocument = usersCollections.document(user.email)
 
-        // Delete the account itself. On success, user will be signed out
+        // Delete ads associated with the user's email
+        userDocument.delete().addOnSuccessListener {
+            val adsCollection = db.collection(Constants.COLLECTION_ADS)
+            val adsQuery = adsCollection.whereEqualTo(Constants.ADS_FIELD_AUTHOR, user.email)
+
+            adsQuery.get().addOnSuccessListener { adsDocuments ->
+                for (adDocument in adsDocuments) {
+                    val adId = adDocument.id
+                    val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE)
+
+                    // Delete each ad document
+                    adsCollection.document(adId).delete()
+
+                    // Delete each ad image
+                    if (adImgUrl != null) {
+                        Utils.deleteFirebaseImage(adImgUrl)
+                    }
+                }
+            }
+        }
+
+        // Delete Firebase Storage information associated to the account
+        if (user.photoUrl.isNotEmpty()) {
+            Utils.deleteFirebaseImage(user.photoUrl)
+        }
+
+        // Delete Firebase Authentication information
         FirebaseAuth.getInstance().currentUser?.delete()?.addOnSuccessListener {
             signOut()
         }
@@ -171,14 +194,7 @@ class ConfigurationActivity : AppCompatActivity() {
      * Signs out the user and finishes the activity.
      */
     private fun signOut() {
-        val auth = FirebaseAuth.getInstance()
-
-        if (auth.currentUser != null) {
-            auth.signOut()
-        }
-
-        val intent = Intent()
-        setResult(Activity.RESULT_OK, intent)
+        FirebaseAuth.getInstance().signOut()
         finish()
     }
 

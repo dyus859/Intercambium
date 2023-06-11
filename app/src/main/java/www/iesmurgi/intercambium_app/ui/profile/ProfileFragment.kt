@@ -91,10 +91,13 @@ class ProfileFragment : Fragment() {
      * Sets up the listeners for various buttons and actions in the Profile fragment.
      */
     private fun setListeners() {
-        FirebaseAuth.getInstance().addAuthStateListener {
-            val authenticated = it.currentUser != null
-            setUserAuthenticated(authenticated)
+        val auth = FirebaseAuth.getInstance()
+        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            setUserAuthenticated(firebaseAuth.currentUser != null)
         }
+
+        // Register the listener with FirebaseAuth
+        auth.addAuthStateListener(authStateListener)
 
         val signInEmailBtn: Button = binding.signInEmail
         signInEmailBtn.setOnClickListener {

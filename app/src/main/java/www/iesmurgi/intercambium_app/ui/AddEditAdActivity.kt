@@ -282,7 +282,6 @@ class AddEditAdActivity : AppCompatActivity() {
         finish()
     }
 
-
     /**
      * Handles the case when the ad was successfully loaded.
      * Displays the ad information and user details in the activity.

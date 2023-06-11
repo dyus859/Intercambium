@@ -56,13 +56,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Called when the activity is resumed.
-     */
-    override fun onResume() {
-        super.onResume()
-    }
-
-    /**
      * Sets the Firebase authentication state listener to listen for changes in the user's authentication state.
      */
     private fun setFirebaseAuthListener() {
