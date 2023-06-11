@@ -5,11 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
@@ -33,6 +34,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
     private lateinit var adapter: AdAdapter
+    private var filtering = false
 
     /**
      * Inflates the layout for the [HomeFragment] and initializes UI components.
@@ -52,6 +54,7 @@ class HomeFragment : Fragment() {
 
         handleAddButton()
         handleSwipeRefresh()
+        handleSearchView()
 
         return root
     }
@@ -84,16 +87,6 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Sets up the behavior of the swipe refresh layout.
-     */
-    private fun handleSwipeRefresh() {
-        val swipeRefreshLayout = binding.swipeRefreshLayoutHome
-        swipeRefreshLayout.setOnRefreshListener {
-            recyclerView()
-        }
-    }
-
-    /**
      * Sets up the RecyclerView and loads ads from the database.
      */
     private fun recyclerView() {
@@ -114,6 +107,44 @@ class HomeFragment : Fragment() {
     }
 
     /**
+     * Sets up the behavior of the swipe refresh layout.
+     */
+    private fun handleSwipeRefresh() {
+        val swipeRefreshLayout = binding.swipeRefreshLayoutHome
+        swipeRefreshLayout.setOnRefreshListener {
+            recyclerView()
+        }
+    }
+
+    /**
+     * Sets up the search functionality for the search view.
+     */
+    private fun handleSearchView() {
+        // Register an `OnQueryTextListener` to handle search query submission.
+        binding.svAds.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                filtering = true
+                loadAdsFromDB(query.orEmpty())
+
+                // Clear the focus and collapse the SearchView
+                // Prevents calling onQueryTextSubmit twice
+                binding.svAds.clearFocus()
+
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                val query = newText.orEmpty().lowercase().trim()
+                if (query.isEmpty() && filtering) {
+                    filtering = false
+                    loadAdsFromDB(query)
+                }
+                return false
+            }
+        })
+    }
+
+    /**
      * Handles the item click event in the [androidx.recyclerview.widget.RecyclerView].
      *
      * @param ad The clicked [Ad] object.
@@ -130,84 +161,116 @@ class HomeFragment : Fragment() {
         startActivity(intent)
     }
 
-    /**
-     * Loads ads from the Firestore database.
-     */
-    private fun loadAdsFromDB() {
+    private fun loadAdsFromDB(query: String = "") {
         binding.pbHome.show()
 
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
-        adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
-            .get()
-            .addOnFailureListener {
-                handleNoAdsMsg()
-            }
-            .addOnSuccessListener { adDocuments ->
-                if (adapter.adList.size != 0) {
-                    // List had items, so first we need to remove them
-                    // notify the adapter, and then clear the list
+        val queryTask = adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
 
-                    adapter.notifyItemRangeRemoved(0, adapter.adList.size)
-                    adapter.adList.clear()
-                }
+        // Perform separate queries for 'title' and 'description' fields if the query is not empty
+        if (query.isNotEmpty()) {
+            val titleQuery = adsCollection.whereEqualTo(Constants.ADS_FIELD_TITLE_LOWERCASE, query)
+            val descriptionQuery = adsCollection.whereEqualTo(Constants.ADS_FIELD_DESCRIPTION_LOWERCASE, query)
 
-                for (adDocument in adDocuments) {
-                    val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
-                    val usersCollection = db.collection(Constants.COLLECTION_USERS)
-                    val usersDocument = usersCollection.document(author)
-                    usersDocument.get()
-                        .addOnSuccessListener { userDocument ->
-                            // If this account doesn't exist anymore, don't show the ad
-                            if (userDocument.exists()) {
-                                val userEmail = userDocument.id
-                                val userName =
-                                    userDocument.getString(Constants.USERS_FIELD_NAME).toString()
-                                val userAge =
-                                    userDocument.getLong(Constants.USERS_FIELD_AGE)
-                                val userPhoneNumber =
-                                    userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
-                                val userPhotoUrl =
-                                    userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
-
-                                val adId = adDocument.id
-                                val adTitle =
-                                    adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
-                                val adDesc =
-                                    adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
-                                val adProvince =
-                                    adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
-                                val adStatus =
-                                    adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
-                                var adCreatedAt =
-                                    adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
-                                val adImgUrl =
-                                    adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
-
-                                if (adCreatedAt == null) {
-                                    adCreatedAt = Timestamp.now()
-                                }
-
-                                val user = User(userEmail, userName, userAge, userPhoneNumber, userPhotoUrl)
-                                val ad =
-                                    Ad(adId, adTitle, adDesc, adProvince, adStatus,
-                                        adCreatedAt, adImgUrl, user)
-                                ad.visible = Utils.isAdVisibleForUser(ad)
-
-                                // Add the add to the list
-                                adapter.notifyItemInserted(adapter.adList.size)
-                                adapter.adList.add(ad)
-                            }
-
-                            handleNoAdsMsg()
-                        }
-                }
-
-                // There are no ads in the database
-                if (adDocuments.size() == 0) {
+            // Execute title query
+            titleQuery.get().addOnSuccessListener { titleDocuments ->
+                println("titleDocuments: ${titleDocuments.documents}")
+                // Execute description query
+                descriptionQuery.get().addOnSuccessListener { descriptionDocuments ->
+                    // Merge the results
+                    val mergedDocuments = mergeQueryDocuments(titleDocuments.documents, descriptionDocuments.documents)
+                    println("descriptionDocuments: ${descriptionDocuments.documents}")
+                    // Process the merged documents
+                    processQueryResults(mergedDocuments)
+                }.addOnFailureListener {
                     handleNoAdsMsg()
                 }
+            }.addOnFailureListener {
+                handleNoAdsMsg()
             }
+        } else {
+            // If the query is empty, execute the default query
+            queryTask.get()
+                .addOnFailureListener {
+                    handleNoAdsMsg()
+                }
+                .addOnSuccessListener { adDocuments ->
+                    // Process the query results
+                    processQueryResults(adDocuments.documents)
+                }
+        }
+    }
+
+    // Function to merge Firestore query documents
+    private fun mergeQueryDocuments(query1: List<DocumentSnapshot>, query2: List<DocumentSnapshot>): List<DocumentSnapshot> {
+        val mergedDocuments = mutableListOf<DocumentSnapshot>()
+        mergedDocuments.addAll(query1)
+        mergedDocuments.addAll(query2)
+        return mergedDocuments
+    }
+
+    // Function to process the query results
+    private fun processQueryResults(adDocuments: List<DocumentSnapshot>) {
+        if (adapter.adList.size != 0) {
+            adapter.notifyItemRangeRemoved(0, adapter.adList.size)
+            adapter.adList.clear()
+        }
+
+        println("processQueryResults $adDocuments")
+
+        val db = Firebase.firestore
+        for (adDocument in adDocuments) {
+            val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
+            val usersCollection = db.collection(Constants.COLLECTION_USERS)
+            val usersDocument = usersCollection.document(author)
+            usersDocument.get()
+                .addOnSuccessListener { userDocument ->
+                    // If this account doesn't exist anymore, don't show the ad
+                    if (userDocument.exists()) {
+                        val userEmail = userDocument.id
+                        val userName =
+                            userDocument.getString(Constants.USERS_FIELD_NAME).toString()
+                        val userAge =
+                            userDocument.getLong(Constants.USERS_FIELD_AGE)
+                        val userPhoneNumber =
+                            userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
+                        val userPhotoUrl =
+                            userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
+
+                        val adId = adDocument.id
+                        val adTitle =
+                            adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
+                        val adDesc =
+                            adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
+                        val adProvince =
+                            adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
+                        val adStatus =
+                            adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
+                        var adCreatedAt =
+                            adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
+                        val adImgUrl =
+                            adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
+
+                        if (adCreatedAt == null) {
+                            adCreatedAt = Timestamp.now()
+                        }
+
+                        val user = User(userEmail, userName, userAge, userPhoneNumber, userPhotoUrl)
+                        val ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt, adImgUrl, user)
+                        ad.visible = Utils.isAdVisibleForUser(ad)
+
+                        adapter.notifyItemInserted(adapter.adList.size)
+                        adapter.adList.add(ad)
+                    }
+
+                    handleNoAdsMsg()
+                }
+        }
+
+        if (adDocuments.isEmpty()) {
+            handleNoAdsMsg()
+        }
     }
 
     /**

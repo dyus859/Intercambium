@@ -18,24 +18,6 @@ import java.util.*
  */
 object Utils {
     /**
-     * Retrieves the data of an ad and converts it into a HashMap.
-     *
-     * @param ad The [Ad] object containing the data.
-     * @return A [HashMap] containing the ad data with field names as keys.
-     */
-    fun getAdData(ad: Ad): HashMap<String, Any> {
-        return hashMapOf(
-            Constants.ADS_FIELD_TITLE to ad.title,
-            Constants.ADS_FIELD_DESCRIPTION to ad.description,
-            Constants.ADS_FIELD_PROVINCE to ad.province,
-            Constants.ADS_FIELD_STATUS to ad.status,
-            Constants.ADS_FIELD_CREATED_AT to ad.createdAt,
-            Constants.ADS_FIELD_IMAGE to ad.imgUrl,
-            Constants.ADS_FIELD_AUTHOR to ad.author.email
-        )
-    }
-
-    /**
      * Checks if an ad should be visible to the user based on the ad's status and the user's role.
      *
      * @param ad The [Ad] to check visibility for.

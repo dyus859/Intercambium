@@ -128,7 +128,7 @@ class ConfigurationActivity : AppCompatActivity() {
             binding.tvNameConfiguration.text = getString(R.string.label_name_configuration, notSet)
         }
 
-        if (user.age != null) {
+        if (user.age != 0L) {
             binding.tvAgeConfiguration.text = getString(R.string.label_age_configuration, user.age.toString())
         } else {
             binding.tvAgeConfiguration.text = getString(R.string.label_age_configuration, notSet)

@@ -3,7 +3,9 @@ package www.iesmurgi.intercambium_app.db
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.utils.Constants
+import java.util.HashMap
 
 /**
  * Utility class for database operations.
@@ -24,6 +26,26 @@ class DbUtils {
                 Constants.USERS_FIELD_AGE to 0,
                 Constants.USERS_FIELD_PHONE_NUMBER to "",
                 Constants.USERS_FIELD_PHOTO_URL to "",
+            )
+        }
+
+        /**
+         * Retrieves the data of an ad and converts it into a HashMap.
+         *
+         * @param ad The [Ad] object containing the data.
+         * @return A [HashMap] containing the ad data with field names as keys.
+         */
+        fun getAdData(ad: Ad): HashMap<String, Any> {
+            return hashMapOf(
+                Constants.ADS_FIELD_TITLE to ad.title,
+                Constants.ADS_FIELD_TITLE_LOWERCASE to ad.title.lowercase(),
+                Constants.ADS_FIELD_DESCRIPTION to ad.description,
+                Constants.ADS_FIELD_DESCRIPTION_LOWERCASE to ad.description.lowercase(),
+                Constants.ADS_FIELD_PROVINCE to ad.province,
+                Constants.ADS_FIELD_STATUS to ad.status,
+                Constants.ADS_FIELD_CREATED_AT to ad.createdAt,
+                Constants.ADS_FIELD_IMAGE to ad.imgUrl,
+                Constants.ADS_FIELD_AUTHOR to ad.author.email
             )
         }
 

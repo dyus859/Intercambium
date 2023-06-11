@@ -28,25 +28,37 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout_home"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_ads_home"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginStart="1dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginEnd="1dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:itemCount="3"
-            tools:listitem="@layout/item_ad"
-            android:paddingBottom="64dp"/>
+            android:orientation="vertical">
+
+            <SearchView
+                android:id="@+id/sv_ads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:iconifiedByDefault="false"
+                android:padding="4dp"
+                android:queryHint="@string/search_ads_hint" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_ads_home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="1dp"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_ad"
+                android:paddingBottom="64dp"/>
+
+        </LinearLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

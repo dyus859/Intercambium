@@ -64,4 +64,5 @@
     <string name="error_operation_could_not_be_done">No se ha podido realizar la operación.</string>
     <string name="ad_successfully_edited">El anuncio se ha editado con éxito.</string>
     <string name="ad_successfully_deleted">El anuncio se ha borrado con éxito.</string>
+    <string name="search_ads_hint">Buscar anuncio…</string>
 </resources>

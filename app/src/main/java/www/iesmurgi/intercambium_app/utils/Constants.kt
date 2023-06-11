@@ -22,9 +22,19 @@ object Constants {
     const val ADS_FIELD_TITLE = "title"
 
     /**
+     * Field name for the lowercase title of an ad document.
+     */
+    const val ADS_FIELD_TITLE_LOWERCASE = "title_lowercase"
+
+    /**
      * Field name for the description of an ad document.
      */
     const val ADS_FIELD_DESCRIPTION = "description"
+
+    /**
+     * Field name for the lowercase description of an ad document.
+     */
+    const val ADS_FIELD_DESCRIPTION_LOWERCASE = "description_lowercase"
 
     /**
      * Field name for the province of an ad document.

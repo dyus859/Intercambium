@@ -21,6 +21,7 @@ import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityAddEditAdBinding
 import www.iesmurgi.intercambium_app.databinding.DialogEditImageBinding
+import www.iesmurgi.intercambium_app.db.DbUtils
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.Province
 import www.iesmurgi.intercambium_app.models.User
@@ -435,8 +436,11 @@ class AddEditAdActivity : AppCompatActivity() {
         }
 
         val tempAd = Ad(tempAdId, title, description, selectedProvinceName)
-        tempAd.imgUrl = ad.imgUrl
         tempAd.author = User(SharedData.getUser().value!!)
+
+        if (isEditing()) {
+            tempAd.imgUrl = ad.imgUrl
+        }
 
         // Show ProgressBar
         binding.pbAddEditAd.show()
@@ -476,7 +480,7 @@ class AddEditAdActivity : AppCompatActivity() {
     private fun updatePublishAd(ad: Ad) {
         val db = Firebase.firestore
         val collection = db.collection(Constants.COLLECTION_ADS)
-        val data = Utils.getAdData(ad)
+        val data = DbUtils.getAdData(ad)
 
         val document = if (!isEditing()) {
             collection.document()
