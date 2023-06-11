@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.findNavController
+import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.BuildConfig
 import www.iesmurgi.intercambium_app.models.Ad
 import java.io.File
@@ -90,5 +91,21 @@ object Utils {
         val navController = view?.findNavController()
         navController?.popBackStack()
         navController?.navigate(resId)
+    }
+
+    /**
+     * Deletes an image file from Firebase Storage using the provided URL.
+     *
+     * @param url The URL of the image file to be deleted.
+     */
+    fun deleteFirebaseImage(url: String) {
+        // Create a FirebaseStorage instance
+        val storage = FirebaseStorage.getInstance()
+
+        // Get the reference to the image file using the provided URL
+        val imageRef = storage.getReferenceFromUrl(url)
+
+        // Delete the image file
+        imageRef.delete()
     }
 }

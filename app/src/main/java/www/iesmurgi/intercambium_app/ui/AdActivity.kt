@@ -20,6 +20,7 @@ import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
+import www.iesmurgi.intercambium_app.utils.Utils
 
 /**
  * Activity class for displaying and managing an advertisement.
@@ -36,6 +37,7 @@ class AdActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAdBinding
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
     private var adId: String = ""
+    private var adImgUrl: String = ""
 
     /**
      * Called when the activity is starting.
@@ -57,13 +59,12 @@ class AdActivity : AppCompatActivity() {
 
                 if (data != null) {
                     val ad = data.getSerializableExtra("AD") as Ad
-                    val user = SharedData.getUser().value!!
 
                     val msg = getString(R.string.ad_successfully_edited)
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
                     // Update the values
-                    handleSuccess(ad, user)
+                    handleSuccess(ad)
                 }
             }
         }
@@ -115,7 +116,7 @@ class AdActivity : AppCompatActivity() {
                                     val userPhotoUrl =
                                         userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
 
-                                    adId = adDocument.id
+                                    val adId = adDocument.id
                                     val adTitle =
                                         adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
                                     val adDesc =
@@ -137,7 +138,7 @@ class AdActivity : AppCompatActivity() {
                                     val ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt,
                                         adImgUrl, user)
 
-                                    handleSuccess(ad, user)
+                                    handleSuccess(ad)
                                 }
                             }
                     } else {
@@ -150,17 +151,6 @@ class AdActivity : AppCompatActivity() {
             .addOnFailureListener {
                 handleFailure()
             }
-    }
-
-    /**
-     * Sets the click listeners for all buttons in the activity.
-     */
-    private fun setListeners() {
-        binding.btnPublishAd.setOnClickListener { onPublishClick() }
-        binding.btnHideAd.setOnClickListener { onHideClick() }
-        binding.btnEditAd.setOnClickListener { onEditClick() }
-        binding.btnDeleteAd.setOnClickListener { onDeleteClick() }
-//        binding.btnOpenChatAd.setOnClickListener { onOpenChatClick()}
     }
 
     /**
@@ -180,11 +170,13 @@ class AdActivity : AppCompatActivity() {
      * Displays the ad information and user details in the activity.
      *
      * @param ad The loaded [Ad] object.
-     * @param user The User object associated with the ad.
      */
-    private fun handleSuccess(ad: Ad, user: User) {
+    private fun handleSuccess(ad: Ad) {
         // Hide ProgressBar
         binding.pbAdInfo.hide()
+
+        adId = ad.id
+        adImgUrl = ad.imgUrl
 
         // Render images
         binding.ivAdProvinceInfo.visibility = View.VISIBLE
@@ -197,7 +189,15 @@ class AdActivity : AppCompatActivity() {
         binding.tvItemAdLocation.text = ad.province
         binding.tvItemAdTitleInfo.text = ad.title
         binding.tvItemAdDescriptionInfo.text = ad.description
-        binding.tvItemAdUserNameInfo.text = user.name
+        binding.tvItemAdUserNameInfo.text = ad.author.name
+
+        // Set chat button visibility
+        val currentUser = SharedData.getUser().value!!
+        if (ad.author.email == currentUser.email) {
+            binding.btnOpenChatAd.visibility = View.GONE
+        } else {
+            binding.btnOpenChatAd.visibility = View.VISIBLE
+        }
 
         // Set ad img
         if (ad.imgUrl.isNotEmpty()) {
@@ -247,6 +247,18 @@ class AdActivity : AppCompatActivity() {
 
         // Show 'Open Chat' button
         binding.btnOpenChatAd.visibility = View.VISIBLE
+    }
+
+
+    /**
+     * Sets the click listeners for all buttons in the activity.
+     */
+    private fun setListeners() {
+        binding.btnPublishAd.setOnClickListener { onPublishClick() }
+        binding.btnHideAd.setOnClickListener { onHideClick() }
+        binding.btnEditAd.setOnClickListener { onEditClick() }
+        binding.btnDeleteAd.setOnClickListener { onDeleteClick() }
+//        binding.btnOpenChatAd.setOnClickListener { onOpenChatClick()}
     }
 
     /**
@@ -308,7 +320,7 @@ class AdActivity : AppCompatActivity() {
     private fun onDeleteClick() {
         if (adId.isNotEmpty()) {
             val title = getString(R.string.dialog_delete_ad)
-            createConfirmationAlertDialog(title) { deleteAd(adId) }
+            createConfirmationAlertDialog(title) { deleteAd(adId, adImgUrl) }
         }
     }
 
@@ -342,29 +354,29 @@ class AdActivity : AppCompatActivity() {
             }
     }
 
-    /**
-     * Deletes the specified ad.
-     *
-     * @param id The ID of the ad to delete.
-     */
-    private fun deleteAd(id: String) {
+    private fun deleteAd(id: String, imgUrl: String) {
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
 
         // Show ProgressBar
         binding.pbAdInfo.show()
 
+        println("imgUrl: $imgUrl")
+
         adsCollection.document(id)
             .delete()
             .addOnCompleteListener { task ->
+                // Delete the Firebase Storage image associated to that ad
+                Utils.deleteFirebaseImage(imgUrl)
+
+                // Hide ProgressBar
+                binding.pbAdInfo.hide()
+
                 val msg = if (task.isSuccessful) {
                     getString(R.string.ad_successfully_deleted)
                 } else {
                     getString(R.string.error_operation_could_not_be_done)
                 }
-
-                // Hide ProgressBar
-                binding.pbAdInfo.hide()
 
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 finish()

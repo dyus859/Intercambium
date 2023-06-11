@@ -389,7 +389,7 @@ class ConfigurationActivity : AppCompatActivity() {
                     }
                     .addOnSuccessListener { uri ->
                         if (user.photoUrl.isNotEmpty()) {
-                            deletePreviousImage(user.photoUrl)
+                            Utils.deleteFirebaseImage(user.photoUrl)
                         }
 
                         // Set new url
@@ -411,22 +411,6 @@ class ConfigurationActivity : AppCompatActivity() {
 
         val msg = getString(R.string.error_operation_could_not_be_done)
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-    }
-
-    /**
-     * Deletes the previous profile picture from Firebase Storage.
-     *
-     * @param fileName The file name or path of the previous image to be deleted.
-     */
-    private fun deletePreviousImage(fileName: String) {
-        // Create a FirebaseStorage instance
-        val storage = FirebaseStorage.getInstance()
-
-        // Get the reference to the image file using the provided URL
-        val imageRef = storage.getReferenceFromUrl(fileName)
-
-        // Delete the image file
-        imageRef.delete()
     }
 
     /**

@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NavUtils
 import com.bumptech.glide.Glide
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -211,28 +212,53 @@ class AddEditAdActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { adDocument ->
                 if (adDocument.exists()) {
-                    val adTitle = adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
-                    val adDesc = adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
-                    val adProvince = adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
-                    val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
-                    ad = Ad(adDocument.id, adTitle, adDesc, adProvince)
-                    ad.imgUrl = adImgUrl
+                    val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
 
-                    binding.tieAdTitle.setText(ad.title)
-                    binding.tieAdDescription.setText(ad.description)
+                    if (author.isNotEmpty()) {
+                        val usersCollection = db.collection(Constants.COLLECTION_USERS)
+                        val usersDocument = usersCollection.document(author)
 
-                    if (ad.imgUrl.isNotEmpty()) {
-                        Glide.with(this)
-                            .load(ad.imgUrl)
-                            .into(binding.ivImageAdd)
+                        usersDocument.get()
+                            .addOnSuccessListener { userDocument ->
+                                if (userDocument.exists()) {
+                                    val userEmail = userDocument.id
+                                    val userName =
+                                        userDocument.getString(Constants.USERS_FIELD_NAME).toString()
+                                    val userAge =
+                                        userDocument.getLong(Constants.USERS_FIELD_AGE)
+                                    val userPhoneNumber =
+                                        userDocument.getString(Constants.USERS_FIELD_PHONE_NUMBER).toString()
+                                    val userPhotoUrl =
+                                        userDocument.getString(Constants.USERS_FIELD_PHOTO_URL).toString()
+
+                                    val adId = adDocument.id
+                                    val adTitle =
+                                        adDocument.getString(Constants.ADS_FIELD_TITLE).toString()
+                                    val adDesc =
+                                        adDocument.getString(Constants.ADS_FIELD_DESCRIPTION).toString()
+                                    val adProvince =
+                                        adDocument.getString(Constants.ADS_FIELD_PROVINCE).toString()
+                                    val adStatus =
+                                        adDocument.getString(Constants.ADS_FIELD_STATUS).toString()
+                                    var adCreatedAt =
+                                        adDocument.getTimestamp(Constants.ADS_FIELD_CREATED_AT)
+                                    val adImgUrl =
+                                        adDocument.getString(Constants.ADS_FIELD_IMAGE).toString()
+
+                                    if (adCreatedAt == null) {
+                                        adCreatedAt = Timestamp.now()
+                                    }
+
+                                    val user = User(userEmail, userName, userAge, userPhoneNumber, userPhotoUrl)
+                                    ad = Ad(adId, adTitle, adDesc, adProvince, adStatus, adCreatedAt,
+                                        adImgUrl, user)
+
+                                    handleSuccess(ad)
+                                }
+                            }
+                    } else {
+                        handleFailure()
                     }
-
-                    // Hide the ProgressBar
-                    binding.pbAddEditAd.hide()
-
-                    selectedProvinceName = ad.province
-                    binding.mactAdProvince.setText(ad.province, false)
-                    binding.mactAdProvince.setSelection(binding.mactAdProvince.text.length)
                 } else {
                     handleFailure()
                 }
@@ -254,6 +280,34 @@ class AddEditAdActivity : AppCompatActivity() {
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 
         finish()
+    }
+
+
+    /**
+     * Handles the case when the ad was successfully loaded.
+     * Displays the ad information and user details in the activity.
+     *
+     * @param ad The loaded [Ad] object.
+     */
+    private fun handleSuccess(ad: Ad) {
+        // Hide the ProgressBar
+        binding.pbAddEditAd.hide()
+
+        // Set content
+        binding.tieAdTitle.setText(ad.title)
+        binding.tieAdDescription.setText(ad.description)
+
+        // Load ad image
+        if (ad.imgUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(ad.imgUrl)
+                .into(binding.ivImageAdd)
+        }
+
+        // Set the province name
+        selectedProvinceName = ad.province
+        binding.mactAdProvince.setText(ad.province, false)
+        binding.mactAdProvince.setSelection(binding.mactAdProvince.text.length)
     }
 
     /**
