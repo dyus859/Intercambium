@@ -144,7 +144,10 @@ object Utils {
 
         with(dialogConfirmationBinding) {
             btnCancelAction.setOnClickListener { alertDialog.dismiss() }
-            btnConfirmAction.setOnClickListener { onSuccess() }
+            btnConfirmAction.setOnClickListener {
+                onSuccess()
+                alertDialog.dismiss()
+            }
         }
     }
 }
