@@ -15,7 +15,6 @@ import www.iesmurgi.intercambium_app.utils.Constants
  * @property imgUrl The URL of the image associated with the ad.
  * @property author The user who created the ad.
  * @property loaded Indicates if the ad has been loaded.
- * @property visible Indicates if the ad is visible.
  * @constructor Creates an instance of the [Ad] class.
  *
  * @author Denis Yushkin
@@ -31,5 +30,4 @@ data class Ad(
     var imgUrl: String = "",
     var author: User = User(),
     var loaded: Boolean = false,
-    var visible: Boolean = true,
 ) : java.io.Serializable

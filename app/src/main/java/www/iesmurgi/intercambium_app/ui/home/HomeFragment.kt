@@ -53,10 +53,10 @@ class HomeFragment : Fragment() {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        handleAddButton()
-        handleSwipeRefresh()
-        handleSearchView()
+        // Prevents "E/RecyclerView: No adapter attached; skipping layout"
+        recyclerView(false)
 
+        setupUIComponents()
         return root
     }
 
@@ -69,15 +69,20 @@ class HomeFragment : Fragment() {
     }
 
     /**
+     * Sets up the UI components and event listeners.
+     */
+    private fun setupUIComponents() {
+        handleAddButton()
+        handleSwipeRefresh()
+        handleSearchView()
+    }
+
+    /**
      * Handles the behavior of the 'Add an ad' button based on user authorization status.
      */
     private fun handleAddButton() {
         // Don't show 'Add an ad' button if user is not authorized
-        if (FirebaseAuth.getInstance().currentUser == null) {
-            binding.fabAddHome.visibility = View.GONE
-        } else {
-            binding.fabAddHome.visibility = View.VISIBLE
-        }
+        binding.fabAddHome.visibility = if (FirebaseAuth.getInstance().currentUser != null) View.VISIBLE else View.GONE
 
         // When user clicks on 'Add an ad'
         binding.fabAddHome.setOnClickListener {
@@ -90,21 +95,18 @@ class HomeFragment : Fragment() {
     /**
      * Sets up the RecyclerView and loads ads from the database.
      */
-    private fun recyclerView(query: String = "") {
+    private fun recyclerView(load: Boolean = true, query: String = "") {
         val context = requireContext()
 
-        if (!this::adapter.isInitialized) {
-            adapter = AdAdapter(context) { onItemClick(it) }
-            binding.rvAdsHome.adapter = adapter
-            binding.rvAdsHome.layoutManager = LinearLayoutManager(context)
-        } else {
-            // Avoid "E/RecyclerView: No adapter attached; skipping layout"
-            binding.rvAdsHome.adapter = adapter
-            // Avoid "E/RecyclerView: No layout manager attached; skipping layout"
-            binding.rvAdsHome.layoutManager = LinearLayoutManager(context)
-        }
+        adapter = AdAdapter(context) { onItemClick(it) }
+        // Avoid "E/RecyclerView: No adapter attached; skipping layout"
+        binding.rvAdsHome.adapter = adapter
+        // Avoid "E/RecyclerView: No layout manager attached; skipping layout"
+        binding.rvAdsHome.layoutManager = LinearLayoutManager(context)
 
-        loadAdsFromDB(query)
+        if (load) {
+            loadAdsFromDB(query)
+        }
     }
 
     /**
@@ -131,11 +133,8 @@ class HomeFragment : Fragment() {
         val swipeRefreshLayout = binding.swipeRefreshLayoutHome
         swipeRefreshLayout.setOnRefreshListener {
             // Need to take into account that there may be a search query at the moment
-            if (!filtering) {
-                recyclerView()
-            } else {
-                recyclerView(binding.svAds.query.toString().trim())
-            }
+            val query = if (binding.svAds.query.isNullOrBlank()) "" else binding.svAds.query.toString().trim()
+            loadAdsFromDB(query)
         }
     }
 
@@ -173,64 +172,55 @@ class HomeFragment : Fragment() {
      * @param query The search query string. Default is an empty string.
      */
     private fun loadAdsFromDB(query: String = "") {
-        binding.pbHome.show()
+        // Show Swipe Refresh animation
+        binding.swipeRefreshLayoutHome.isRefreshing = true
 
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
         val queryTask = adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
 
-        // Perform separate queries for 'title' and 'description' fields if the query is not empty
         if (query.isNotEmpty()) {
+            // Create both tasks (documents containing title and documents containing description)
             val titleQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_TITLE_SEARCH, query)
             val descriptionQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_DESCRIPTION_SEARCH, query)
 
-            // Execute title query
-            titleQuery.get().addOnSuccessListener { titleDocuments ->
-                // Execute description query
-                descriptionQuery.get().addOnSuccessListener { descriptionDocuments ->
-                    // Merge the results
-                    val mergedDocuments = mergeQueryDocuments(titleDocuments.documents, descriptionDocuments.documents)
-                    // Process the merged documents
-                    processQueryResults(mergedDocuments)
-                }.addOnFailureListener {
-                    handleNoAdsMsg()
+            val titleTask = titleQuery.get()
+            val descriptionTask = descriptionQuery.get()
+
+            // Execute both tasks first, then listen
+            Tasks.whenAllSuccess<List<DocumentSnapshot>>(titleTask, descriptionTask)
+                .addOnSuccessListener { results ->
+                    val titleDocuments = results[0] as QuerySnapshot
+                    val descriptionDocuments = results[1] as QuerySnapshot
+
+                    // Merge both document into one
+                    val mergedDocuments = titleDocuments.documents +
+                            descriptionDocuments.documents.distinctBy { it.id }
+
+                    // Sort by created_at field (descending order) to always show the newest
+                    val sortedDocuments = mergedDocuments.sortedByDescending {
+                        it.getTimestamp(Constants.ADS_FIELD_CREATED_AT)?.toDate()
+                    }
+                    processQueryResults(sortedDocuments)
                 }
-            }.addOnFailureListener {
-                handleNoAdsMsg()
-            }
-        } else {
-            // If the query is empty, execute the default query
-            queryTask.get()
                 .addOnFailureListener {
                     handleNoAdsMsg()
                 }
+        } else {
+            // There is no query, execute it directly
+
+            queryTask.get()
                 .addOnSuccessListener { adDocuments ->
-                    // Process the query results
-                    processQueryResults(adDocuments.documents)
+                    // Sort by created_at field (descending order) to always show the newest
+                    val sortedDocuments = adDocuments.documents.sortedByDescending {
+                        it.getTimestamp(Constants.ADS_FIELD_CREATED_AT)?.toDate()
+                    }
+                    processQueryResults(sortedDocuments)
+                }
+                .addOnFailureListener {
+                    handleNoAdsMsg()
                 }
         }
-    }
-
-    /**
-     * Merges Firestore query documents and removes duplicates based on document ID.
-     *
-     * @param query1 The first list of Firestore query documents.
-     * @param query2 The second list of Firestore query documents.
-     * @return The merged list of documents without duplicates.
-     */
-    private fun mergeQueryDocuments(
-        query1: List<DocumentSnapshot>,
-        query2: List<DocumentSnapshot>
-    ): List<DocumentSnapshot> {
-        val mergedDocuments = mutableListOf<DocumentSnapshot>()
-        mergedDocuments.addAll(query1)
-        mergedDocuments.addAll(query2)
-
-        // Remove duplicates based on document ID
-        val uniqueDocuments = linkedSetOf<DocumentSnapshot>()
-        uniqueDocuments.addAll(mergedDocuments)
-
-        return uniqueDocuments.toList()
     }
 
     /**
@@ -254,9 +244,10 @@ class HomeFragment : Fragment() {
                 if (userDocument.exists()) {
                     val user = userDocument.toUser()
                     val ad = adDocument.toAd(user)
-                    ad.visible = Utils.isAdVisibleForUser(ad)
 
-                    newAdList.add(ad)
+                    if (Utils.isAdVisibleForUser(ad)) {
+                        newAdList.add(ad)
+                    }
                 }
             }
         }
@@ -284,13 +275,11 @@ class HomeFragment : Fragment() {
      * Handles the visibility of the 'No ads' message based on the presence and visibility of ads.
      */
     private fun handleNoAdsMsg() {
-        binding.swipeRefreshLayoutHome.isRefreshing = false
-        binding.pbHome.hide()
+        with(binding) {
+            // Hide Swipe Refresh animation
+            swipeRefreshLayoutHome.isRefreshing = false
 
-        if (adapter.adList.size == 0 || adapter.getVisibleAdsCount() == 0) {
-            binding.tvNoAdsHome.visibility = View.VISIBLE
-        } else {
-            binding.tvNoAdsHome.visibility = View.GONE
+            tvNoAdsHome.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
         }
     }
 }

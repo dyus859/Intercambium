@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -14,7 +13,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityAdBinding
-import www.iesmurgi.intercambium_app.databinding.DialogConfirmationBinding
 import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
 import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
@@ -100,11 +98,12 @@ class AdActivity : AppCompatActivity() {
     /**
      * Retrieves the ID of the ad from the previous activity and loads the ad information.
      */
-    private fun fetchData(showProgressBar: Boolean) {
+    private fun fetchData(showRefreshAnimation: Boolean) {
         val extras = intent.extras ?: return
         extras.getString("AD")?.let {
-            if (showProgressBar) {
-                binding.pbAdInfo.show()
+            if (showRefreshAnimation) {
+                // Show Swipe Refresh animation
+                binding.swipeRefreshLayoutAd.isRefreshing = true
             }
 
             loadAd(it)
@@ -162,9 +161,6 @@ class AdActivity : AppCompatActivity() {
         // Hide Swipe Refresh animation
         binding.swipeRefreshLayoutAd.isRefreshing = false
 
-        // Hide ProgressBar
-        binding.pbAdInfo.hide()
-
         // Return back to the main activity
         finish()
 
@@ -181,9 +177,6 @@ class AdActivity : AppCompatActivity() {
     private fun handleSuccess(ad: Ad) {
         // Hide Swipe Refresh animation
         binding.swipeRefreshLayoutAd.isRefreshing = false
-
-        // Hide ProgressBar
-        binding.pbAdInfo.hide()
 
         adId = ad.id
         adImgUrl = ad.imgUrl
@@ -207,16 +200,20 @@ class AdActivity : AppCompatActivity() {
             btnOpenChatAd.visibility = if (ad.author.email == currentUser.email) View.GONE else View.VISIBLE
 
             // Set ad image
-            Glide.with(this@AdActivity)
-                .load(ad.imgUrl.takeIf { it.isNotEmpty() })
-                .placeholder(R.drawable.no_image)
-                .into(ivItemAdImageInfo)
+            if (ad.imgUrl.isNotEmpty()) {
+                Glide.with(this@AdActivity)
+                    .load(ad.imgUrl)
+                    .placeholder(R.drawable.no_image)
+                    .into(ivItemAdImageInfo)
+            }
 
             // Set user's profile picture
-            Glide.with(this@AdActivity)
-                .load(ad.author.photoUrl.takeIf { it.isNotEmpty() })
-                .placeholder(R.drawable.default_avatar)
-                .into(sivItemAdUserPhotoInfo)
+            if (ad.author.photoUrl.isNotEmpty()) {
+                Glide.with(this@AdActivity)
+                    .load(ad.author.photoUrl)
+                    .placeholder(R.drawable.default_avatar)
+                    .into(sivItemAdUserPhotoInfo)
+            }
         }
     }
 
@@ -252,19 +249,9 @@ class AdActivity : AppCompatActivity() {
      * Called when the user clicks on the 'Publish ad' button.
      */
     private fun onPublishClick() {
-        if (adId.isEmpty()) {
-            return
-        }
-
         val title = getString(R.string.dialog_publish_ad)
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
-        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
-
-        val alertDialog = Utils.createAlertDialog(this, title, view)
-
-        with(dialogConfirmationBinding) {
-            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
-            btnConfirmAction.setOnClickListener { setNewAdStatus(adId, Constants.AD_STATUS_PUBLISHED) }
+        Utils.createConfirmationAlertDialog(this, title) {
+            setNewAdStatus(adId, Constants.AD_STATUS_PUBLISHED)
         }
     }
 
@@ -272,19 +259,9 @@ class AdActivity : AppCompatActivity() {
      * Called when the user clicks on the 'Hide ad' button.
      */
     private fun onHideClick() {
-        if (adId.isEmpty()) {
-            return
-        }
-
         val title = getString(R.string.dialog_hide_ad)
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
-        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
-
-        val alertDialog = Utils.createAlertDialog(this, title, view)
-
-        with(dialogConfirmationBinding) {
-            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
-            btnConfirmAction.setOnClickListener { setNewAdStatus(adId, Constants.AD_STATUS_IN_REVISION) }
+        Utils.createConfirmationAlertDialog(this, title) {
+            setNewAdStatus(adId, Constants.AD_STATUS_IN_REVISION)
         }
     }
 
@@ -304,19 +281,9 @@ class AdActivity : AppCompatActivity() {
      * Called when the user clicks on the 'Delete ad' button.
      */
     private fun onDeleteClick() {
-        if (adId.isEmpty()) {
-            return
-        }
-
         val title = getString(R.string.dialog_delete_ad)
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
-        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
-
-        val alertDialog = Utils.createAlertDialog(this, title, view)
-
-        with(dialogConfirmationBinding) {
-            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
-            btnConfirmAction.setOnClickListener { deleteAd(adId, adImgUrl) }
+        Utils.createConfirmationAlertDialog(this, title) {
+            deleteAd(adId, adImgUrl)
         }
     }
 
@@ -330,8 +297,8 @@ class AdActivity : AppCompatActivity() {
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
 
-        // Show ProgressBar
-        binding.pbAdInfo.show()
+        // Show Swipe Refresh animation
+        binding.swipeRefreshLayoutAd.isRefreshing = true
 
         adsCollection.document(id)
             .update(Constants.ADS_FIELD_STATUS, status)
@@ -342,8 +309,8 @@ class AdActivity : AppCompatActivity() {
                     getString(R.string.error_operation_could_not_be_done)
                 }
 
-                // Hide ProgressBar
-                binding.pbAdInfo.hide()
+                // Hide Swipe Refresh animation
+                binding.swipeRefreshLayoutAd.isRefreshing = false
 
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 handleActionsVisibility(status)
@@ -354,8 +321,8 @@ class AdActivity : AppCompatActivity() {
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
 
-        // Show ProgressBar
-        binding.pbAdInfo.show()
+        // Show Swipe Refresh animation
+        binding.swipeRefreshLayoutAd.isRefreshing = true
 
         println("imgUrl: $imgUrl")
 
@@ -365,8 +332,8 @@ class AdActivity : AppCompatActivity() {
                 // Delete the Firebase Storage image associated to that ad
                 Utils.deleteFirebaseImage(imgUrl)
 
-                // Hide ProgressBar
-                binding.pbAdInfo.hide()
+                // Hide Swipe Refresh animation
+                binding.swipeRefreshLayoutAd.isRefreshing = false
 
                 val msg = if (task.isSuccessful) {
                     getString(R.string.ad_successfully_deleted)

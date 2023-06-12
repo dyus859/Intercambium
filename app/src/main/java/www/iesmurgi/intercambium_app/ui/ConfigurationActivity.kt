@@ -16,7 +16,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityConfigurationBinding
-import www.iesmurgi.intercambium_app.databinding.DialogConfirmationBinding
 import www.iesmurgi.intercambium_app.databinding.DialogEditImageBinding
 import www.iesmurgi.intercambium_app.databinding.DialogEditNameBinding
 import www.iesmurgi.intercambium_app.databinding.DialogEditPasswordBinding
@@ -74,7 +73,6 @@ class ConfigurationActivity : AppCompatActivity() {
             uri?.let {
                 latestImgUri = uri
                 previewImage.setImageURI(null)
-                previewImage.setImageURI(uri)
                 uploadAndSetProfilePicture()
             }
         }
@@ -84,7 +82,6 @@ class ConfigurationActivity : AppCompatActivity() {
             if (isSuccess) {
                 latestImgUri?.let { uri ->
                     previewImage.setImageURI(null)
-                    previewImage.setImageURI(uri)
                     uploadAndSetProfilePicture()
                 }
             }
@@ -334,6 +331,7 @@ class ConfigurationActivity : AppCompatActivity() {
             .update(Constants.USERS_FIELD_PHOTO_URL, url)
             .addOnSuccessListener {
                 user.photoUrl = url
+                previewImage.setImageURI(latestImgUri)
             }
     }
 
@@ -345,10 +343,12 @@ class ConfigurationActivity : AppCompatActivity() {
             tvEmailConfiguration.text = user.email
             tvNameConfiguration.text = user.name
 
-            Glide.with(this@ConfigurationActivity)
-                .load(user.photoUrl.takeIf { it.isNotEmpty() })
-                .placeholder(R.drawable.default_avatar)
-                .into(ivProfilePicture)
+            if (user.photoUrl.isNotEmpty()) {
+                Glide.with(this@ConfigurationActivity)
+                    .load(user.photoUrl)
+                    .placeholder(R.drawable.default_avatar)
+                    .into(ivProfilePicture)
+            }
         }
     }
 
@@ -357,14 +357,8 @@ class ConfigurationActivity : AppCompatActivity() {
      */
     private fun onDeleteAccountClick() {
         val title = getString(R.string.dialog_delete_account_title)
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_confirmation, null)
-        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
-
-        val alertDialog = Utils.createAlertDialog(this, title, view)
-
-        with(dialogConfirmationBinding) {
-            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
-            btnConfirmAction.setOnClickListener { deleteAccount() }
+        Utils.createConfirmationAlertDialog(this, title) {
+            deleteAccount()
         }
     }
 

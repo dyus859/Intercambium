@@ -11,7 +11,6 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ItemAdBinding
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.utils.Constants
-import www.iesmurgi.intercambium_app.utils.Utils
 
 /**
  * [androidx.recyclerview.widget.RecyclerView] adapter for displaying ads.
@@ -45,14 +44,6 @@ class AdAdapter(
          * @param ad The [Ad] object to bind.
          */
         fun bind(ad: Ad) = with(itemBinding) {
-            val canUserSeeAd = Utils.isAdVisibleForUser(ad)
-
-            if (!canUserSeeAd) {
-                itemView.visibility = View.GONE
-                return
-            }
-            itemView.visibility = View.VISIBLE
-
             if (ad.status == Constants.AD_STATUS_IN_REVISION) {
                 cvAdContainer.setBackgroundColor(ContextCompat.getColor(itemView.context,
                     R.color.pale_yellow))
@@ -70,6 +61,7 @@ class AdAdapter(
             if (ad.imgUrl.isNotEmpty()) {
                 Glide.with(context)
                     .load(ad.imgUrl)
+                    .placeholder(R.drawable.no_image)
                     .into(sivItemAdImage)
             } else {
                 sivItemAdImage.setImageResource(R.drawable.no_image)
@@ -78,6 +70,7 @@ class AdAdapter(
             if (ad.author.photoUrl.isNotEmpty()) {
                 Glide.with(context)
                     .load(ad.author.photoUrl)
+                    .placeholder(R.drawable.default_avatar)
                     .into(sivItemAdUserPhoto)
             } else {
                 sivItemAdUserPhoto.setImageResource(R.drawable.default_avatar)
@@ -118,12 +111,5 @@ class AdAdapter(
      * @return The total number of items in the [adList].
      */
     override fun getItemCount(): Int = adList.size
-
-    /**
-     * Returns the count of visible ads in the list.
-     *
-     * @return The count of visible ads.
-     */
-    fun getVisibleAdsCount(): Int = adList.count { it.visible }
 
 }

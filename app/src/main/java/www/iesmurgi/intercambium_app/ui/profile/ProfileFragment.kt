@@ -1,7 +1,6 @@
 package www.iesmurgi.intercambium_app.ui.profile
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
@@ -15,7 +14,6 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import www.iesmurgi.intercambium_app.R
-import www.iesmurgi.intercambium_app.databinding.DialogSignOutBinding
 import www.iesmurgi.intercambium_app.databinding.FragmentProfileBinding
 import www.iesmurgi.intercambium_app.db.DbUtils
 import www.iesmurgi.intercambium_app.ui.ConfigurationActivity
@@ -226,21 +224,8 @@ class ProfileFragment : Fragment() {
      * Displays a dialog asking the user to confirm the sign-out action.
      */
     private fun showSignOutDialog() {
-        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_sign_out, null)
-        val dialogSignOutBinding = DialogSignOutBinding.bind(view)
-
-        val alertDialogBuilder = AlertDialog.Builder(activity)
-            .setTitle(getString(R.string.menu_sign_out_title))
-            .setNegativeButton(getString(android.R.string.cancel), null)
-            .setView(view)
-
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
-
-        // When user clicks on 'Sign out'
-        dialogSignOutBinding.btnSignOut.setOnClickListener {
-            alertDialog.dismiss()
-
+        val title = getString(R.string.menu_sign_out_title)
+        Utils.createConfirmationAlertDialog(requireActivity(), title) {
             showLogoutMessage = true
             FirebaseAuth.getInstance().signOut()
         }

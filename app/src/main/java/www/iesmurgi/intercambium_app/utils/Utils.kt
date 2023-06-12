@@ -3,6 +3,7 @@ package www.iesmurgi.intercambium_app.utils
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
+import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -11,6 +12,7 @@ import androidx.navigation.findNavController
 import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.BuildConfig
 import www.iesmurgi.intercambium_app.R
+import www.iesmurgi.intercambium_app.databinding.DialogConfirmationBinding
 import www.iesmurgi.intercambium_app.models.Ad
 import java.io.File
 import java.util.*
@@ -126,5 +128,23 @@ object Utils {
         alertDialog.show()
 
         return alertDialog
+    }
+
+    /**
+     * Creates a confirmation alert dialog with the specified title and onSuccess callback.
+     *
+     * @param title The title of the confirmation dialog.
+     * @param onSuccess The callback function to be executed when the confirm button is clicked.
+     */
+    fun createConfirmationAlertDialog(activity: Activity, title: String, onSuccess: () -> Unit) {
+        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_confirmation, null)
+        val dialogConfirmationBinding = DialogConfirmationBinding.bind(view)
+
+        val alertDialog = createAlertDialog(activity, title, view)
+
+        with(dialogConfirmationBinding) {
+            btnCancelAction.setOnClickListener { alertDialog.dismiss() }
+            btnConfirmAction.setOnClickListener { onSuccess() }
+        }
     }
 }
