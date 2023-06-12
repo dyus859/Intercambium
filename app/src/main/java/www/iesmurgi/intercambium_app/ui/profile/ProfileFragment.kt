@@ -139,10 +139,10 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        // Update options menu, to show logout option
-        if (authenticated) {
-            activity?.invalidateOptionsMenu()
-        } else if (showLogoutMessage) {
+        // Update options menu
+        activity?.invalidateOptionsMenu()
+
+        if (!authenticated && showLogoutMessage) {
             showLogoutMessage = false
             Toast.makeText(activity, getString(R.string.signed_out), Toast.LENGTH_LONG).show()
             Utils.navigateToFragment(view, R.id.navigation_home)

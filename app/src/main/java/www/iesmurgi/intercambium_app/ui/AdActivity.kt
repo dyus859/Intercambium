@@ -34,8 +34,7 @@ import www.iesmurgi.intercambium_app.utils.Utils
 class AdActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAdBinding
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
-    private var adId: String = ""
-    private var adImgUrl: String = ""
+    private lateinit var ad: Ad
 
     /**
      * Called when the activity is starting.
@@ -81,7 +80,7 @@ class AdActivity : AppCompatActivity() {
             btnHideAd.setOnClickListener { onHideClick() }
             btnEditAd.setOnClickListener { onEditClick() }
             btnDeleteAd.setOnClickListener { onDeleteClick() }
-//            btnOpenChatAd.setOnClickListener { onOpenChatClick()}
+            btnOpenChatAd.setOnClickListener { onOpenChatClick()}
         }
     }
 
@@ -132,7 +131,7 @@ class AdActivity : AppCompatActivity() {
                             .addOnSuccessListener { userDocument ->
                                 if (userDocument.exists()) {
                                     val user = userDocument.toUser()
-                                    val ad = adDocument.toAd(user)
+                                    ad = adDocument.toAd(user)
                                     handleSuccess(ad)
                                 } else {
                                     handleFailure()
@@ -177,9 +176,6 @@ class AdActivity : AppCompatActivity() {
     private fun handleSuccess(ad: Ad) {
         // Hide Swipe Refresh animation
         binding.swipeRefreshLayoutAd.isRefreshing = false
-
-        adId = ad.id
-        adImgUrl = ad.imgUrl
 
         with(binding) {
             // Render images
@@ -251,7 +247,7 @@ class AdActivity : AppCompatActivity() {
     private fun onPublishClick() {
         val title = getString(R.string.dialog_publish_ad)
         Utils.createConfirmationAlertDialog(this, title) {
-            setNewAdStatus(adId, Constants.AD_STATUS_PUBLISHED)
+            setNewAdStatus(ad.id, Constants.AD_STATUS_PUBLISHED)
         }
     }
 
@@ -261,7 +257,7 @@ class AdActivity : AppCompatActivity() {
     private fun onHideClick() {
         val title = getString(R.string.dialog_hide_ad)
         Utils.createConfirmationAlertDialog(this, title) {
-            setNewAdStatus(adId, Constants.AD_STATUS_IN_REVISION)
+            setNewAdStatus(ad.id, Constants.AD_STATUS_IN_REVISION)
         }
     }
 
@@ -269,10 +265,10 @@ class AdActivity : AppCompatActivity() {
      * Called when the user clicks on the 'Edit ad' button.
      */
     private fun onEditClick() {
-        if (adId.isNotEmpty()) {
+        if (ad.id.isNotEmpty()) {
             val intent = Intent(this, AddEditAdActivity::class.java)
             intent.putExtra("GOTO", "AdActivity")
-            intent.putExtra("AD", adId)
+            intent.putExtra("AD", ad.id)
             activityLauncher.launch(intent)
         }
     }
@@ -283,7 +279,7 @@ class AdActivity : AppCompatActivity() {
     private fun onDeleteClick() {
         val title = getString(R.string.dialog_delete_ad)
         Utils.createConfirmationAlertDialog(this, title) {
-            deleteAd(adId, adImgUrl)
+            deleteAd(ad.id, ad.imgUrl)
         }
     }
 
@@ -317,6 +313,12 @@ class AdActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Deletes an ad from the database.
+     *
+     * @param id The ID of the ad to be deleted.
+     * @param imgUrl The URL of the image associated with the ad.
+     */
     private fun deleteAd(id: String, imgUrl: String) {
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
@@ -344,5 +346,11 @@ class AdActivity : AppCompatActivity() {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 finish()
             }
+    }
+
+    private fun onOpenChatClick() {
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra("USER", ad.author)
+        startActivity(intent)
     }
 }

@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         val appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_home,
+                R.id.navigation_chats,
                 R.id.navigation_notifications,
                 R.id.navigation_profile,
             )
@@ -54,6 +55,11 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         setFirebaseAuthListener()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        setUserStatusListener()
     }
 
     /**
@@ -74,12 +80,35 @@ class MainActivity : AppCompatActivity() {
                 userDocument.get().addOnSuccessListener { document ->
                     SharedData.setUser(document.toUser())
                 }
+
+                // Set online field to true when user signs in
+                userDocument.update(Constants.USERS_FIELD_ONLINE, true)
             } else {
+                setUserStatusListener()
                 SharedData.setUser(User())
             }
         }
 
         // Register the listener with FirebaseAuth
         auth.addAuthStateListener(authStateListener)
+    }
+
+    private fun setUserStatusListener(email: String? = null) {
+        val db = Firebase.firestore
+        val usersCollection = db.collection(Constants.COLLECTION_USERS)
+        var currentEmail = ""
+
+        if (email == null) {
+            val currentUser = SharedData.getUser().value
+            if (currentUser != null && currentUser.email.isNotEmpty()) {
+                currentEmail = currentUser.email
+            }
+        }
+
+        if (currentEmail.isNotEmpty()) {
+            usersCollection
+                .document(currentEmail)
+                .update(Constants.USERS_FIELD_ONLINE, false)
+        }
     }
 }

@@ -2,12 +2,16 @@ package www.iesmurgi.intercambium_app.db
 
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.models.Ad
+import www.iesmurgi.intercambium_app.models.Message
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
+import www.iesmurgi.intercambium_app.utils.SharedData
 import java.util.HashMap
 
 /**
@@ -24,10 +28,11 @@ class DbUtils {
          */
         private fun getDefaultUserData(): MutableMap<String, Any> {
             return hashMapOf(
-                Constants.USERS_FIELD_ADMINISTRATOR to false,
                 Constants.USERS_FIELD_NAME to "",
-                Constants.USERS_FIELD_PHONE_NUMBER to "",
                 Constants.USERS_FIELD_PHOTO_URL to "",
+                Constants.USERS_FIELD_ONLINE to true,
+                Constants.USERS_FIELD_LAST_ACTIVE to FieldValue.serverTimestamp(),
+                Constants.USERS_FIELD_ADMINISTRATOR to false,
             )
         }
 
@@ -55,14 +60,32 @@ class DbUtils {
         }
 
         /**
+         * Retrieves the data of a message and converts it into a [HashMap].
+         *
+         * @param message The [Message] object containing the data.
+         * @return A [HashMap] containing the message data with field names as keys.
+         */
+        fun getMessageData(message: Message): HashMap<String, Any> {
+            return hashMapOf(
+                Constants.CHATS_FIELD_CONTENT to message.content,
+                Constants.CHATS_FIELD_TIME to message.timeStamp,
+                Constants.CHATS_FIELD_IMAGE_URL to message.imageUrl,
+                Constants.CHATS_FIELD_SENDER_UID to message.senderId,
+                Constants.CHATS_FIELD_DELETED to message.deleted,
+            )
+        }
+
+        /**
          * Creates a new user with Google authentication.
          *
          * @param response The [IdpResponse] object containing the authentication response.
          */
         fun createNewUserWithGoogle(response: IdpResponse) {
             val data = getDefaultUserData()
+            val user = SharedData.getUser().value!!
+
+            data[Constants.USERS_FIELD_UID] = user.uid
             data[Constants.USERS_FIELD_NAME] = response.user.name ?: ""
-            data[Constants.USERS_FIELD_PHONE_NUMBER] = response.phoneNumber ?: ""
             data[Constants.USERS_FIELD_PHOTO_URL] = (response.user.photoUri ?: "") as String
             val email = response.email.toString()
 
@@ -81,6 +104,9 @@ class DbUtils {
          */
         fun createNewUserWithEmail(email: String) {
             val data = getDefaultUserData()
+            val userUid = FirebaseAuth.getInstance().uid
+
+            data[Constants.USERS_FIELD_UID] = userUid.toString()
             data[Constants.USERS_FIELD_NAME] = email.substringBefore("@")
 
             createNewUserDocument(email, data)
@@ -106,12 +132,12 @@ class DbUtils {
          */
         fun DocumentSnapshot.toUser(): User {
             val email = id
+            val uid = getString(Constants.USERS_FIELD_UID).orEmpty()
             val name = getString(Constants.USERS_FIELD_NAME).orEmpty()
-            val phoneNumber = getString(Constants.USERS_FIELD_PHONE_NUMBER).orEmpty()
             val photoUrl = getString(Constants.USERS_FIELD_PHOTO_URL).orEmpty()
             val isAdministrator = getBoolean(Constants.USERS_FIELD_ADMINISTRATOR) ?: false
 
-            return User(email, name, phoneNumber, photoUrl, isAdministrator)
+            return User(uid, email, name, photoUrl, isAdministrator)
         }
 
         /**
@@ -130,6 +156,21 @@ class DbUtils {
             val imgUrl = getString(Constants.ADS_FIELD_IMAGE).orEmpty()
 
             return Ad(id, title, description, province, status, createdAt, imgUrl, author)
+        }
+
+        /**
+         * Extension function to convert a [DocumentSnapshot] to a [Message] object.
+         *
+         * @return The converted [Message] object.
+         */
+        fun DocumentSnapshot.toMessage(): Message {
+            val content = getString(Constants.CHATS_FIELD_CONTENT).orEmpty()
+            val senderUid = getString(Constants.CHATS_FIELD_SENDER_UID).orEmpty()
+            val imageUrl = getString(Constants.CHATS_FIELD_IMAGE_URL).orEmpty()
+            val time = getLong(Constants.CHATS_FIELD_TIME) ?: 0
+            val deleted = getBoolean(Constants.CHATS_FIELD_DELETED) ?: false
+
+            return Message(id, content, senderUid, imageUrl, time, deleted)
         }
     }
 }

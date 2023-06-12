@@ -56,6 +56,16 @@ object Constants {
      */
     const val ADS_FIELD_DESCRIPTION_SEARCH = "description_search"
 
+    /**
+     * Status of an ad document in the "in revision" state.
+     */
+    const val AD_STATUS_IN_REVISION = "in_revision"
+
+    /**
+     * Status of an ad document in the "published" state.
+     */
+    const val AD_STATUS_PUBLISHED = "published"
+
     /************************************************************
      ************************************************************
      ************************************************************/
@@ -66,19 +76,29 @@ object Constants {
     const val COLLECTION_USERS = "users"
 
     /**
+     * Field name for the uid of a user document.
+     */
+    const val USERS_FIELD_UID = "uid"
+
+    /**
      * Field name for the name of a user document.
      */
     const val USERS_FIELD_NAME = "name"
 
     /**
-     * Field name for the phone number of a user document.
-     */
-    const val USERS_FIELD_PHONE_NUMBER = "phoneNumber"
-
-    /**
      * Field name for the photo URL of a user document.
      */
     const val USERS_FIELD_PHOTO_URL = "photoUrl"
+
+    /**
+     * Field name for the online status of a user document.
+     */
+    const val USERS_FIELD_ONLINE = "online"
+
+    /**
+     * Field name for the last active time of a user document.
+     */
+    const val USERS_FIELD_LAST_ACTIVE = "lastActive"
 
     /**
      * Field name for the administrator status of a user document.
@@ -119,6 +139,11 @@ object Constants {
      */
     const val STORAGE_USERS_IMAGES_PATH = "users/"
 
+    /**
+     * Path for storing message images in the storage.
+     */
+    const val STORAGE_CHATS_IMAGES_PATH = "chats/"
+
     /************************************************************
      ************************************************************
      ************************************************************/
@@ -128,17 +153,51 @@ object Constants {
      */
     const val MIN_PASSWORD_LENGTH = 6
 
+
     /************************************************************
      ************************************************************
      ************************************************************/
 
     /**
-     * Status of an ad document in the "in revision" state.
+     * Document name for chats collection.
      */
-    const val AD_STATUS_IN_REVISION = "in_revision"
+    const val COLLECTION_CHATS = "chats"
 
     /**
-     * Status of an ad document in the "published" state.
+     * Collection name for chat messages.
      */
-    const val AD_STATUS_PUBLISHED = "published"
+    const val CHATS_COLLECTION_MESSAGES = "messages"
+
+    /**
+     * Field name for the message participants of a message document.
+     */
+    const val CHATS_FIELD_PARTICIPANTS = "participants"
+
+    /**
+     * Field name for the message content of a message document.
+     */
+    const val CHATS_FIELD_CONTENT = "content"
+
+    /**
+     * Field name for the message time of a message document.
+     */
+    const val CHATS_FIELD_TIME = "time"
+
+    /**
+     * Field name for the sender uid of a message document.
+     */
+    const val CHATS_FIELD_SENDER_UID = "senderUid"
+
+    /**
+     * Field name for the image url of a message document.
+     */
+    const val CHATS_FIELD_IMAGE_URL = "imageUrl"
+
+    /**
+     * Field name for the deleted status of a message document.
+     */
+    const val CHATS_FIELD_DELETED = "deleted"
+
+    const val CHAT_SEND_ID = 1
+    const val CHAT_RECEIVE_ID = 2
 }

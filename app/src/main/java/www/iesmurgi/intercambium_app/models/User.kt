@@ -5,7 +5,6 @@ package www.iesmurgi.intercambium_app.models
  *
  * @property email The email address of the user.
  * @property name The name of the user.
- * @property phoneNumber The phone number of the user.
  * @property photoUrl The URL of the user's photo.
  * @property administrator Indicates if the user is an administrator.
  * @constructor Creates an instance of the [User] class.
@@ -13,10 +12,11 @@ package www.iesmurgi.intercambium_app.models
  * @author Denis Yushkin
  */
 data class User(
+    val uid: String = "",
     val email: String = "",
     var name: String = "",
-    val phoneNumber: String = "",
     var photoUrl: String = "",
+    var online: Boolean = true,
     val administrator: Boolean = false,
 ) : java.io.Serializable {
 
@@ -28,7 +28,6 @@ data class User(
     constructor(other: User) : this(
         email = other.email,
         name = other.name,
-        phoneNumber = other.phoneNumber,
         photoUrl = other.photoUrl,
         administrator = other.administrator,
     )

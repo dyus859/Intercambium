@@ -12,7 +12,9 @@
     <color name="blue">#434E6F</color>
     <color name="dimgray">#696969</color>
     <color name="light_gray">#F7F8FA</color>
+    <color name="charcoal_gray">#5C5C5C</color>
     <color name="pale_yellow">#FFFFCC</color>
     <color name="faded_black">#808080</color>
     <color name="dark_green">#21581E</color>
+    <color name="aqua_haze">#77b2AE</color>
 </resources>

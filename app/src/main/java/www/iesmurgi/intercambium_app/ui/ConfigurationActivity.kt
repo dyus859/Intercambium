@@ -80,7 +80,7 @@ class ConfigurationActivity : AppCompatActivity() {
         takeImageResult = registerForActivityResult(
             ActivityResultContracts.TakePicture()) { isSuccess ->
             if (isSuccess) {
-                latestImgUri?.let { uri ->
+                latestImgUri?.let { _ ->
                     previewImage.setImageURI(null)
                     uploadAndSetProfilePicture()
                 }
@@ -397,9 +397,20 @@ class ConfigurationActivity : AppCompatActivity() {
             Utils.deleteFirebaseImage(user.photoUrl)
         }
 
-        // Delete Firebase Authentication information
-        FirebaseAuth.getInstance().currentUser?.delete()?.addOnSuccessListener {
-            signOut()
+        val firebaseAuthUser = FirebaseAuth.getInstance().currentUser
+
+        if (firebaseAuthUser != null) {
+            firebaseAuthUser.delete()
+                .addOnSuccessListener {
+                    val msg = getString(R.string.delete_account_success)
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+                    signOut()
+                }
+                .addOnFailureListener {
+                    val msg = getString(R.string.delete_account_failed)
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                }
         }
     }
 

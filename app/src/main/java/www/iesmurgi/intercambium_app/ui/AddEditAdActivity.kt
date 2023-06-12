@@ -520,7 +520,8 @@ class AddEditAdActivity : AppCompatActivity() {
         document.set(data)
             .addOnFailureListener {
                 handleUpdatingPublishingFailure()
-            }
+                val msg = getString(R.string.error_operation_could_not_be_done)
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()         }
             .addOnSuccessListener {
                 ad.id = document.id
                 finishActivity(ad)
@@ -538,8 +539,7 @@ class AddEditAdActivity : AppCompatActivity() {
         // Allow to try again
         canSave = true
 
-        val msg = getString(R.string.error_operation_could_not_be_done)
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
     }
 
     /**
