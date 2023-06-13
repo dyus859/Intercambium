@@ -20,11 +20,21 @@ import www.iesmurgi.intercambium_app.ui.MainActivity
 import www.iesmurgi.intercambium_app.utils.Constants
 import kotlin.random.Random
 
+/**
+ * Service for handling Firebase Cloud Messaging (FCM) messages.
+ *
+ * This service extends FirebaseMessagingService and handles the reception of FCM messages.
+ * It generates and displays notifications based on the received messages.
+ *
+ * Note: The FCM token refresh functionality is not implemented in this service.
+ */
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
+
+        println("onMessageReceived")
 
         // Handle the received message and generate the notification
         remoteMessage.notification?.let { notification ->
@@ -36,9 +46,19 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
+    /**
+     * Shows a notification based on the received message.
+     *
+     * This method generates and displays a notification with the provided message details.
+     * It handles different types of notifications and opens the corresponding activities when clicked.
+     *
+     * @param body The body text of the notification.
+     * @param type The type of the notification.
+     * @param userDataJson The JSON representation of the associated user data.
+     */
     private fun showNotification(body: String?, type: String?, userDataJson: String?) {
         val channelId = "NOTIFICATION_CHANNEL"
-        var channelName: String
+        val channelName: String
 
         val notificationId = Random.nextInt()
 
@@ -75,7 +95,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             applicationContext,
             0,
             intent,
-            pendingIntentFlags // setting the mutability flag
+            pendingIntentFlags
         )
 
         val notificationSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -102,5 +122,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         notificationManager.notify(notificationId, notificationBuilder.build())
+
+        println("notificationManager: $notificationManager $notificationId")
     }
 }

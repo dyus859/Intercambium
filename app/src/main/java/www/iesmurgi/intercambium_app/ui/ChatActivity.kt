@@ -76,6 +76,26 @@ class ChatActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
     }
 
+    override fun onStop() {
+        super.onStop()
+        setUserOnlineStatus(online = false)
+    }
+
+    /**
+     * Sets the online status of the user.
+     *
+     * @param online Boolean value indicating the online status.
+     */
+    private fun setUserOnlineStatus(online: Boolean) {
+        val db = Firebase.firestore
+        db.collection(Constants.COLLECTION_USERS)
+            .document(senderUser.email)
+            .update(Constants.USERS_FIELD_ONLINE, online)
+            .addOnSuccessListener {
+                senderUser.online = online
+            }
+    }
+
     override fun onCreateContextMenu(
         menu: ContextMenu?,
         v: View?,
@@ -379,19 +399,23 @@ class ChatActivity : AppCompatActivity() {
         senderRoomRef.collection(Constants.CHATS_COLLECTION_MESSAGES).document(messageId).set(msgData)
         receiverRoomRef.collection(Constants.CHATS_COLLECTION_MESSAGES).document(messageId).set(msgData)
 
-        val notificationMsg = if (imageUrl.isEmpty()) {
-            getString(R.string.notification_message_sent, senderUser.name, message.content)
-        } else {
-            getString(R.string.notification_image_sent, senderUser.name)
-        }
+        setUserOnlineStatus(true)
 
-        // Send the notification
-        FCMHelper.sendNotificationToDevice(
-            receiverUser.fcmToken,
-            notificationMsg,
-            Constants.NOTIFICATION_TYPE_CHAT,
-            senderUser
-        )
+        if (senderUid != receiverUid) {
+            val notificationMsg = if (imageUrl.isEmpty()) {
+                getString(R.string.notification_message_sent, senderUser.name, message.content)
+            } else {
+                getString(R.string.notification_image_sent, senderUser.name)
+            }
+
+            // Send the notification
+            FCMHelper.sendNotificationToDevice(
+                receiverUser.fcmToken,
+                notificationMsg,
+                Constants.NOTIFICATION_TYPE_CHAT,
+                senderUser
+            )
+        }
     }
 
     /**

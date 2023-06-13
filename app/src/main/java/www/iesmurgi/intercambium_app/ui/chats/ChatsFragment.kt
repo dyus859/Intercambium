@@ -25,20 +25,17 @@ import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.Utils
 import kotlin.collections.ArrayList
 
+/**
+ * Fragment that displays the list of chats.
+ *
+ * @author Denis Yushkin
+ */
 class ChatsFragment : Fragment() {
 
     private lateinit var binding: FragmentChatsBinding
     private lateinit var adapter: ChatAdapter
     private var filtering = false
 
-    /**
-     * Inflates the layout for the [ChatsFragment] and initializes UI components.
-     *
-     * @param inflater The [LayoutInflater] object that can be used to inflate any views in the fragment.
-     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state as given here.
-     * @return The root View of the inflated layout for the fragment.
-     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,9 +51,6 @@ class ChatsFragment : Fragment() {
         return root
     }
 
-    /**
-     * Called when the fragment is resumed. Updates the recyclerView.
-     */
     override fun onResume() {
         super.onResume()
         recyclerView()

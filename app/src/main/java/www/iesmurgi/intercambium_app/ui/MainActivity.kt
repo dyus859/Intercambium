@@ -57,11 +57,6 @@ class MainActivity : AppCompatActivity() {
         setFirebaseAuthListener()
     }
 
-    override fun onStop() {
-        super.onStop()
-        setUserOnlineStatus()
-    }
-
     /**
      * Sets the Firebase authentication state listener to listen for changes in the user's authentication state.
      */
@@ -87,11 +82,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-
-                // Set online field to true when user signs in
-                userDocument.update(Constants.USERS_FIELD_ONLINE, true)
             } else {
-                setUserOnlineStatus()
                 SharedData.setUser(User())
             }
 
@@ -103,24 +94,5 @@ class MainActivity : AppCompatActivity() {
 
         // Register the listener with FirebaseAuth
         auth.addAuthStateListener(authStateListener)
-    }
-
-    private fun setUserOnlineStatus(email: String? = null) {
-        val db = Firebase.firestore
-        val usersCollection = db.collection(Constants.COLLECTION_USERS)
-        var currentEmail = ""
-
-        if (email == null) {
-            val currentUser = SharedData.getUser().value
-            if (currentUser != null && currentUser.email.isNotEmpty()) {
-                currentEmail = currentUser.email
-            }
-        }
-
-        if (currentEmail.isNotEmpty()) {
-            usersCollection
-                .document(currentEmail)
-                .update(Constants.USERS_FIELD_ONLINE, false)
-        }
     }
 }

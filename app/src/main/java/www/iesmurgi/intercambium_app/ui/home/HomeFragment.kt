@@ -37,14 +37,6 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: AdAdapter
     private var filtering = false
 
-    /**
-     * Inflates the layout for the [HomeFragment] and initializes UI components.
-     *
-     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment.
-     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state as given here.
-     * @return The root View of the inflated layout for the fragment.
-     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,9 +52,6 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    /**
-     * Called when the fragment is resumed. Updates the recyclerView.
-     */
     override fun onResume() {
         super.onResume()
         recyclerView()

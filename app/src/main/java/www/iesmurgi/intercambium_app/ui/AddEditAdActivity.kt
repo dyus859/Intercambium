@@ -53,12 +53,6 @@ class AddEditAdActivity : AppCompatActivity() {
     // Stores if 'save' function can be used at the moment
     private var canSave = true
 
-    /**
-     * Called when the activity is starting.
-     *
-     * @param savedInstanceState If the activity is being re-initialized after previously being
-     *     shut down, this Bundle contains the data it most recently supplied.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddEditAdBinding.inflate(layoutInflater)
@@ -70,30 +64,14 @@ class AddEditAdActivity : AppCompatActivity() {
         getData()
     }
 
-    /**
-     * Retrieves the intent to be used as the parent activity [Intent].
-     *
-     * @return The parent activity [Intent].
-     */
     override fun getSupportParentActivityIntent(): Intent? {
         return getParentActivityIntentImplement()
     }
 
-    /**
-     * Retrieves the intent to be used as the parent activity [Intent].
-     *
-     * @return The parent activity [Intent].
-     */
     override fun getParentActivityIntent(): Intent? {
         return getParentActivityIntentImplement()
     }
 
-
-    /**
-     * Retrieves the intent to be used as the parent activity [Intent].
-     *
-     * @return The parent activity [Intent].
-     */
     private fun getParentActivityIntentImplement(): Intent? {
         val data = intent.extras
         var intent: Intent? = null
@@ -287,19 +265,11 @@ class AddEditAdActivity : AppCompatActivity() {
         binding.mactAdProvince.setSelection(binding.mactAdProvince.text.length)
     }
 
-    /**
-     * Initializes the options menu for the activity.
-     * This function inflates the menu layout and sets the title and icon for the save menu item.
-     */
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
-    /**
-     * Prepares the options menu to be displayed.
-     * This function sets the title and icon for the save menu item.
-     */
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menu?.findItem(R.id.item_save)?.apply {
             setTitle(R.string.save)
@@ -309,12 +279,6 @@ class AddEditAdActivity : AppCompatActivity() {
         return super.onPrepareOptionsMenu(menu)
     }
 
-    /**
-     * Handles the selection of an options menu item.
-     * This function handles the click event for the home and save menu items. When the home menu
-     *  item is selected, the activity navigates up to the parent activity. When the save menu item
-     *  is selected, the [onSaveClick] function is called to save the advertisement.
-     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> NavUtils.navigateUpFromSameTask(this)
@@ -555,8 +519,6 @@ class AddEditAdActivity : AppCompatActivity() {
 
         // Allow to try again
         canSave = true
-
-
     }
 
     /**

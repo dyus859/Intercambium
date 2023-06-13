@@ -36,11 +36,6 @@ class MyAdsActivity : AppCompatActivity() {
 
     private lateinit var user: User
 
-    /**
-     * Called when the activity is starting.
-     *
-     * @param savedInstanceState The saved instance state.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMyAdsBinding.inflate(layoutInflater)
@@ -54,9 +49,6 @@ class MyAdsActivity : AppCompatActivity() {
     }
 
 
-    /**
-     * Called when the activity is resumed.
-     */
     override fun onResume() {
         super.onResume()
         recyclerView()

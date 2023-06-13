@@ -19,12 +19,6 @@ class LoginEmailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginEmailBinding
     private var modeSignIn = true
 
-    /**
-     * Called when the activity is starting.
-     *
-     * @param savedInstanceState If the activity is being re-initialized after previously being
-     *     shut down, this Bundle contains the data it most recently supplied.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginEmailBinding.inflate(layoutInflater)

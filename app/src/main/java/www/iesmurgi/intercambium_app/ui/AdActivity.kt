@@ -17,6 +17,7 @@ import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toAd
 import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.utils.Constants
+import www.iesmurgi.intercambium_app.utils.FCMHelper
 import www.iesmurgi.intercambium_app.utils.SharedData
 import www.iesmurgi.intercambium_app.utils.Utils
 
@@ -36,12 +37,6 @@ class AdActivity : AppCompatActivity() {
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
     private lateinit var ad: Ad
 
-    /**
-     * Called when the activity is starting.
-     *
-     * @param savedInstanceState If the activity is being re-initialized after previously being
-     *     shut down, this Bundle contains the data it most recently supplied.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAdBinding.inflate(layoutInflater)
@@ -310,7 +305,11 @@ class AdActivity : AppCompatActivity() {
                 // Hide Swipe Refresh animation
                 binding.swipeRefreshLayoutAd.isRefreshing = false
 
-                if (status == Constants.AD_STATUS_PUBLISHED) {
+                val user = SharedData.getUser().value!!
+
+                if (status == Constants.AD_STATUS_PUBLISHED
+                    && user.uid != ad.author.uid)
+                {
                     // Send the notification
                     val notificationMsg = getString(R.string.notification_ad_published, ad.title)
                     FCMHelper.sendNotificationToDevice(
@@ -348,20 +347,24 @@ class AdActivity : AppCompatActivity() {
                 // Hide Swipe Refresh animation
                 binding.swipeRefreshLayoutAd.isRefreshing = false
 
+                val user = SharedData.getUser().value!!
+
+                if (user.uid != ad.author.uid) {
+                    // Send the notification
+                    val notificationMsg = getString(R.string.notification_ad_deleted, ad.title)
+                    FCMHelper.sendNotificationToDevice(
+                        ad.author.fcmToken,
+                        notificationMsg,
+                        Constants.NOTIFICATION_TYPE_MAIN,
+                        null,
+                    )
+                }
+
                 val msg = if (task.isSuccessful) {
                     getString(R.string.ad_successfully_deleted)
                 } else {
                     getString(R.string.error_operation_could_not_be_done)
                 }
-
-                // Send the notification
-                val notificationMsg = getString(R.string.notification_ad_deleted, ad.title)
-                FCMHelper.sendNotificationToDevice(
-                    ad.author.fcmToken,
-                    notificationMsg,
-                    Constants.NOTIFICATION_TYPE_MAIN,
-                    null,
-                )
 
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 finish()
