@@ -3,7 +3,6 @@
     <string name="add_edit_ad_parent_activity_name" translatable="false" />
     <string name="title_home">Inicio</string>
     <string name="title_chats">Chats</string>
-    <string name="title_notifications">Buzón</string>
     <string name="title_profile">Perfil</string>
     <string name="hint_title">Título</string>
     <string name="hint_description">Descripción</string>
