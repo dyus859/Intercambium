@@ -167,6 +167,9 @@ class ChatActivity : AppCompatActivity() {
         binding.rvMessages.adapter = adapter
     }
 
+    /**
+     * Handles the long click event on a message item.
+     */
     private fun onItemLongClickListener(view: View, message: Message) {
         if (message.deleted) {
             return
@@ -452,6 +455,12 @@ class ChatActivity : AppCompatActivity() {
         dialog.dismiss()
     }
 
+    /**
+     * Deletes the selected message for everyone in the chat.
+     *
+     * This function updates the 'deleted' field of the selected message to true for both the sender and receiver rooms.
+     * The message will no longer be visible to all participants in the chat.
+     */
     private fun deleteMessageForEveryone() {
         val db = Firebase.firestore
         val chatsCollection = db.collection(Constants.COLLECTION_CHATS)
@@ -471,6 +480,12 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Deletes the selected message for the current user only.
+     *
+     * This function deletes the selected message document from the sender room's collection,
+     * making it no longer visible to the current user.
+     */
     private fun deleteMessageForMe() {
         val db = Firebase.firestore
         val chatsCollection = db.collection(Constants.COLLECTION_CHATS)

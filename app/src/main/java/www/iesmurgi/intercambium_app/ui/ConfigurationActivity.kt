@@ -388,13 +388,13 @@ class ConfigurationActivity : AppCompatActivity() {
             adsQuery.get().addOnSuccessListener { adsDocuments ->
                 for (adDocument in adsDocuments) {
                     val adId = adDocument.id
-                    val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE)
+                    val adImgUrl = adDocument.getString(Constants.ADS_FIELD_IMAGE).orEmpty()
 
                     // Delete each ad document
                     adsCollection.document(adId).delete()
 
                     // Delete each ad image
-                    if (adImgUrl != null) {
+                    if (adImgUrl.isNotEmpty()) {
                         Utils.deleteFirebaseImage(adImgUrl)
                     }
                 }
@@ -405,6 +405,9 @@ class ConfigurationActivity : AppCompatActivity() {
         if (user.photoUrl.isNotEmpty()) {
             Utils.deleteFirebaseImage(user.photoUrl)
         }
+
+        // Delete each chat related to the user
+        Utils.deleteUserChats(user.uid)
 
         val firebaseAuthUser = FirebaseAuth.getInstance().currentUser
 

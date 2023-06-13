@@ -9,6 +9,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.findNavController
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.BuildConfig
 import www.iesmurgi.intercambium_app.R
@@ -116,6 +118,43 @@ object Utils {
 
         // Delete the image file
         imageRef.delete()
+    }
+
+    /**
+     * Deletes user chats from Firebase Firestore.
+     *
+     * This function deletes the chat documents associated with the given UID, along with their messages and image files.
+     *
+     * @param uid The UID of the user whose chats are to be deleted.
+     */
+    fun deleteUserChats(uid: String) {
+        val db = Firebase.firestore
+        val chatsCollection = db.collection(Constants.COLLECTION_CHATS)
+        chatsCollection.get().addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot.documents) {
+                if (document.id.contains(uid)) {
+                    val chatDocument = document.reference
+                    val messagesCollection = chatDocument.collection(Constants.CHATS_COLLECTION_MESSAGES)
+
+                    messagesCollection.get().addOnSuccessListener {
+                        for (messageDocument in it.documents) {
+                            val imageUrl = messageDocument.getString(Constants.CHATS_FIELD_IMAGE_URL)
+
+                            // Delete the chat img
+                            if (imageUrl != null && imageUrl.isNotEmpty()) {
+                                deleteFirebaseImage(imageUrl)
+                            }
+
+                            // Delete the message document
+                            messageDocument.reference.delete()
+
+                            // Delete the chat itself
+                            document.reference.delete()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

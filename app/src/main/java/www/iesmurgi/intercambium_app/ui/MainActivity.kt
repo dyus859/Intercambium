@@ -17,6 +17,7 @@ import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
+import www.iesmurgi.intercambium_app.utils.Utils
 
 /**
  * The main activity of the application.
@@ -86,6 +87,8 @@ class MainActivity : AppCompatActivity() {
                             sharedUser.fcmToken = token
                         }
                     }
+
+                    Utils.deleteUserChats(user.uid)
                 }
 
                 // Set online field to true when user signs in
