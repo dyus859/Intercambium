@@ -25,7 +25,7 @@ data class Ad(
     var province: String = "",
     var status: String = Constants.AD_STATUS_IN_REVISION,
     @Transient
-    var createdAt: Long = 0,
+    var createdAt: Long = java.util.Date().time,
     var imgUrl: String = "",
     var author: User = User(),
     var loaded: Boolean = false,
