@@ -100,6 +100,24 @@ class ConfigurationActivity : AppCompatActivity() {
         }
     }
 
+
+    /**
+     * Fetches the user's data and updates the UI.
+     */
+    private fun fetchData() {
+        with(binding) {
+            tvEmailConfiguration.text = user.email
+            tvNameConfiguration.text = user.name
+
+            if (user.photoUrl.isNotEmpty()) {
+                Glide.with(this@ConfigurationActivity)
+                    .load(user.photoUrl)
+                    .placeholder(R.drawable.default_avatar)
+                    .into(ivProfilePicture)
+            }
+        }
+    }
+
     /**
      * Handles the click event for the edit password button.
      */
@@ -134,6 +152,8 @@ class ConfigurationActivity : AppCompatActivity() {
                         }
                     }
                 }
+
+                alertDialog.dismiss()
             }
         }
     }
@@ -198,6 +218,8 @@ class ConfigurationActivity : AppCompatActivity() {
                 } else {
                     updateValueDB(Constants.USERS_FIELD_NAME, text)
                 }
+
+                alertDialog.dismiss()
             }
         }
     }
@@ -211,13 +233,17 @@ class ConfigurationActivity : AppCompatActivity() {
      */
     private fun updateValueDB(field: String, value: String) {
         val db = Firebase.firestore
-        db.collection(Constants.COLLECTION_USERS)
-            .document(user.email)
-            .update(field, value)
-            .addOnSuccessListener {
-                user.name = value
-                fetchData()
-            }
+        val usersCollections = db.collection(Constants.COLLECTION_USERS)
+        val userDocument = usersCollections.document(user.email)
+
+        userDocument.update(field, value).addOnSuccessListener {
+            user.name = value
+            fetchData()
+
+            // Update nameSearch field
+            val nameWords = value.lowercase().split(" ")
+            userDocument.update(Constants.USERS_FIELD_NAME_SEARCH, nameWords)
+        }
     }
 
     /**
@@ -333,23 +359,6 @@ class ConfigurationActivity : AppCompatActivity() {
                 user.photoUrl = url
                 previewImage.setImageURI(latestImgUri)
             }
-    }
-
-    /**
-     * Fetches the user's data and updates the UI.
-     */
-    private fun fetchData() {
-        with(binding) {
-            tvEmailConfiguration.text = user.email
-            tvNameConfiguration.text = user.name
-
-            if (user.photoUrl.isNotEmpty()) {
-                Glide.with(this@ConfigurationActivity)
-                    .load(user.photoUrl)
-                    .placeholder(R.drawable.default_avatar)
-                    .into(ivProfilePicture)
-            }
-        }
     }
 
     /**
