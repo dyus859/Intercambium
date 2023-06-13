@@ -6,6 +6,7 @@ data class User(
     var name: String = "",
     var photoUrl: String = "",
     var online: Boolean = true,
+    var nameSearch: List<String> = emptyList(),
     var fcmToken: String = "",
     val administrator: Boolean = false,
 ) : java.io.Serializable {
@@ -21,6 +22,7 @@ data class User(
         name = other.name,
         photoUrl = other.photoUrl,
         online = other.online,
+        nameSearch = other.nameSearch,
         fcmToken = other.fcmToken,
         administrator = other.administrator,
     )

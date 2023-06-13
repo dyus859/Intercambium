@@ -92,6 +92,9 @@ class DbUtils {
                 data[Constants.USERS_FIELD_NAME] = email.substringBefore("@")
             }
 
+            val nameWords = (data[Constants.USERS_FIELD_NAME] as String).lowercase().split(" ")
+            data[Constants.USERS_FIELD_NAME_SEARCH] = nameWords
+
             createNewUserDocument(email, data)
         }
 
@@ -106,6 +109,9 @@ class DbUtils {
 
             data[Constants.USERS_FIELD_UID] = userUid.toString()
             data[Constants.USERS_FIELD_NAME] = email.substringBefore("@")
+
+            val nameWords = (data[Constants.USERS_FIELD_NAME] as String).lowercase().split(" ")
+            data[Constants.USERS_FIELD_NAME_SEARCH] = nameWords
 
             createNewUserDocument(email, data)
         }
@@ -134,10 +140,11 @@ class DbUtils {
             val name = getString(Constants.USERS_FIELD_NAME).orEmpty()
             val photoUrl = getString(Constants.USERS_FIELD_PHOTO_URL).orEmpty()
             val online = getBoolean(Constants.USERS_FIELD_ONLINE) ?: false
+            val nameSearch = get(Constants.USERS_FIELD_NAME_SEARCH) as? List<String> ?: emptyList()
             val fcmToken = getString(Constants.USERS_FIELD_FCM_TOKEN).orEmpty()
             val isAdministrator = getBoolean(Constants.USERS_FIELD_ADMINISTRATOR) ?: false
 
-            return User(uid, email, name, photoUrl, online, fcmToken, isAdministrator)
+            return User(uid, email, name, photoUrl, online, nameSearch, fcmToken, isAdministrator)
         }
 
         /**

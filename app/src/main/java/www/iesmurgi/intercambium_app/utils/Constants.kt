@@ -106,6 +106,11 @@ object Constants {
     const val USERS_FIELD_ADMINISTRATOR = "administrator"
 
     /**
+     * Field name for the name search of a user document.
+     */
+    const val USERS_FIELD_NAME_SEARCH = "nameSearch"
+
+    /**
      * Field name for the fcm token of a user document.
      */
     const val USERS_FIELD_FCM_TOKEN = "fcmToken"

@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.FragmentChatsBinding
 import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toMessage
@@ -23,6 +23,7 @@ import www.iesmurgi.intercambium_app.models.adapters.ChatAdapter
 import www.iesmurgi.intercambium_app.ui.ChatActivity
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.Utils
+import kotlin.collections.ArrayList
 
 class ChatsFragment : Fragment() {
 
@@ -151,8 +152,6 @@ class ChatsFragment : Fragment() {
     private fun loadChatsFromDB(query: String = "") {
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        println("currentUserUid: $currentUserUid")
-
         // Show Swipe Refresh animation
         binding.swipeRefreshLayoutChats.isRefreshing = true
 
@@ -162,7 +161,8 @@ class ChatsFragment : Fragment() {
         chatsCollection.get()
             .addOnSuccessListener { querySnapshot ->
                 val chatList: ArrayList<Chat> = ArrayList()
-                val userTasks = mutableListOf<Task<QuerySnapshot>>()
+                val userTasks = mutableListOf<Deferred<Unit>>()
+                val queryWords = query.split(" ")
 
                 for (document in querySnapshot.documents) {
                     val chatId = document.id
@@ -174,8 +174,10 @@ class ChatsFragment : Fragment() {
                         val userQuery = db.collection(Constants.COLLECTION_USERS)
                             .whereEqualTo(Constants.USERS_FIELD_UID, receiverUid)
 
-                        val userTask = userQuery.get()
-                            .addOnSuccessListener { userQuerySnapshot ->
+                        val userTask = GlobalScope.async {
+                            try {
+                                val userQuerySnapshot = userQuery.get().await()
+
                                 if (userQuerySnapshot.documents.size == 1) {
                                     val userDocument = userQuerySnapshot.documents[0]
                                     val user = userDocument.toUser()
@@ -188,62 +190,33 @@ class ChatsFragment : Fragment() {
                                         .orderBy(Constants.CHATS_FIELD_TIME, Query.Direction.DESCENDING)
                                         .limit(1)
 
-                                    latestMessageQuery.get()
-                                        .addOnSuccessListener { messageQuerySnapshot ->
-                                            val latestMessageDocument =
-                                                messageQuerySnapshot.documents.firstOrNull()
+                                    val messageQuerySnapshot = latestMessageQuery.get().await()
+                                    val latestMessageDocument = messageQuerySnapshot.documents.firstOrNull()
+                                    val latestMessage = latestMessageDocument?.toMessage()
 
-                                            val latestMessage = latestMessageDocument?.toMessage()
-
-                                            val chat = Chat(
-                                                chatId,
-                                                user,
-                                                latestMessage?.content ?: "",
-                                                latestMessage?.imageUrl ?: ""
-                                            )
-                                            chatList.add(chat)
-
-                                            // Check if all tasks have completed
-                                            if (chatList.size == userTasks.size) {
-                                                // Clear the existing chat list and add the new chat items
-                                                adapter.chatsList.apply {
-                                                    clear()
-                                                    addAll(chatList)
-                                                }
-
-                                                // Notify the adapter of the changes
-                                                adapter.notifyDataSetChanged()
-
-                                                handleNoAdsMsg()
-                                            }
-                                        }
-                                        .addOnFailureListener {
-                                            val chat = Chat(chatId, user)
-                                            chatList.add(chat)
-
-                                            // Check if all tasks have completed
-                                            if (chatList.size == userTasks.size) {
-                                                // Clear the existing chat list and add the new chat items
-                                                adapter.chatsList.apply {
-                                                    clear()
-                                                    addAll(chatList)
-                                                }
-
-                                                // Notify the adapter of the changes
-                                                adapter.notifyDataSetChanged()
-
-                                                handleNoAdsMsg()
-                                            }
-                                        }
+                                    if (query.isEmpty() || isNameSearchMatch(user.nameSearch, queryWords)) {
+                                        val chat = Chat(
+                                            chatId,
+                                            user,
+                                            latestMessage?.content ?: "",
+                                            latestMessage?.imageUrl ?: ""
+                                        )
+                                        chatList.add(chat)
+                                    }
                                 }
+                            } catch (e: Exception) {
+                                // Handle exceptions if necessary
                             }
+                        }
 
                         userTasks.add(userTask)
                     }
                 }
 
-                // Check if all tasks have completed
-                if (chatList.size == userTasks.size) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    // Await completion of all user tasks
+                    userTasks.awaitAll()
+
                     // Clear the existing chat list and add the new chat items
                     adapter.chatsList.apply {
                         clear()
@@ -257,6 +230,22 @@ class ChatsFragment : Fragment() {
                 }
             }
             .addOnFailureListener { handleNoAdsMsg() }
+    }
+
+    /**
+     * Checks if any of the words in the query match any of the elements in the nameSearch array.
+     *
+     * @param nameSearch The list of strings to search within.
+     * @param queryWords The list of words to search for.
+     * @return True if any word in the query matches any element in nameSearch, false otherwise.
+     */
+    private fun isNameSearchMatch(nameSearch: List<String>, queryWords: List<String>): Boolean {
+        for (word in queryWords) {
+            if (nameSearch.any { it.contains(word, ignoreCase = true) }) {
+                return true
+            }
+        }
+        return false
     }
 
     /**
