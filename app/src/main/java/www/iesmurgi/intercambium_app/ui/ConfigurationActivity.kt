@@ -265,6 +265,12 @@ class ConfigurationActivity : AppCompatActivity() {
         val alertDialog = Utils.createAlertDialog(this, title, view)
 
         with(editImageBinding) {
+            if (user.photoUrl.isNotEmpty()) {
+                llDeletePhoto.visibility = View.VISIBLE
+            } else {
+                llDeletePhoto.visibility = View.GONE
+            }
+
             // User has selected 'Gallery'
             tvChooseFromGallery.setOnClickListener {
                 selectImageFromGallery()
@@ -275,6 +281,20 @@ class ConfigurationActivity : AppCompatActivity() {
             tvTakeAPhoto.setOnClickListener {
                 takeImage()
                 alertDialog.dismiss()
+            }
+
+            // User has selected 'Delete photo'
+            btnDeletePhotoUser.setOnClickListener {
+                if (user.photoUrl.isNotEmpty()) {
+                    Utils.deleteFirebaseImage(user.photoUrl)
+                    user.photoUrl = ""
+                    
+                    val msg = getString(R.string.you_successfully_deleted_your_profile_picture)
+                    Toast.makeText(this@ConfigurationActivity, msg, Toast.LENGTH_SHORT).show()
+                }
+
+                alertDialog.dismiss()
+                previewImage.setImageResource(R.drawable.default_avatar)
             }
         }
     }

@@ -1,7 +1,6 @@
 package www.iesmurgi.intercambium_app.utils
 
 import com.firebase.ui.auth.IdpResponse
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
@@ -159,7 +158,7 @@ class DbUtils {
             val description = getString(Constants.ADS_FIELD_DESCRIPTION).orEmpty()
             val province = getString(Constants.ADS_FIELD_PROVINCE).orEmpty()
             val status = getString(Constants.ADS_FIELD_STATUS).orEmpty()
-            val createdAt = getTimestamp(Constants.ADS_FIELD_CREATED_AT) ?: Timestamp.now()
+            val createdAt = getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
             val imgUrl = getString(Constants.ADS_FIELD_IMAGE).orEmpty()
 
             return Ad(id, title, description, province, status, createdAt, imgUrl, author)

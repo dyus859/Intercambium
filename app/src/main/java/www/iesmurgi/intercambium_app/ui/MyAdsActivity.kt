@@ -178,7 +178,8 @@ class MyAdsActivity : AppCompatActivity() {
 
                     // Sort by created_at field (descending order) to always show the newest
                     val sortedDocuments = mergedDocuments.sortedByDescending {
-                        it.getTimestamp(Constants.ADS_FIELD_CREATED_AT)?.toDate()
+                        val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
+                        java.util.Date(timestamp)
                     }
                     processQueryResults(sortedDocuments)
                 }
@@ -189,7 +190,8 @@ class MyAdsActivity : AppCompatActivity() {
             queryTask.get()
                 .addOnSuccessListener { adDocuments ->
                     val sortedDocuments = adDocuments.documents.sortedByDescending {
-                        it.getTimestamp(Constants.ADS_FIELD_CREATED_AT)?.toDate()
+                        val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
+                        java.util.Date(timestamp)
                     }
                     processQueryResults(sortedDocuments)
                 }

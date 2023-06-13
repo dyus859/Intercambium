@@ -85,4 +85,6 @@
     <string name="notification_image_sent">%1$s te ha enviado una imagen.</string>
     <string name="notification_ad_published">Tu anuncio "%1$s" ha sido publicado.</string>
     <string name="notification_ad_deleted">Tu anuncio "%1$s" ha sido eliminado.</string>
+    <string name="delete_profile_image">Borrar la foto</string>
+    <string name="you_successfully_deleted_your_profile_picture">Ha eliminado con éxito su foto de perfil.</string>
 </resources>

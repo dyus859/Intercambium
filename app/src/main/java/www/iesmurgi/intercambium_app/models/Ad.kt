@@ -1,6 +1,5 @@
 package www.iesmurgi.intercambium_app.models
 
-import com.google.firebase.Timestamp
 import www.iesmurgi.intercambium_app.utils.Constants
 
 /**
@@ -26,7 +25,7 @@ data class Ad(
     var province: String = "",
     var status: String = Constants.AD_STATUS_IN_REVISION,
     @Transient
-    var createdAt: Timestamp = Timestamp.now(),
+    var createdAt: Long = 0,
     var imgUrl: String = "",
     var author: User = User(),
     var loaded: Boolean = false,
