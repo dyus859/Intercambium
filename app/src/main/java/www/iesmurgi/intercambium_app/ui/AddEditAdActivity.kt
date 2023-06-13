@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NavUtils
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -223,7 +224,7 @@ class AddEditAdActivity : AppCompatActivity() {
                             .addOnSuccessListener { userDocument ->
                                 if (userDocument.exists()) {
                                     val user = userDocument.toUser()
-                                    val ad = adDocument.toAd(user)
+                                    ad = adDocument.toAd(user)
                                     handleSuccess(ad)
                                 } else {
                                     handleFailure()
@@ -431,8 +432,13 @@ class AddEditAdActivity : AppCompatActivity() {
             return false
         }
 
+        val currentDrawable = binding.ivImageAdd.drawable
+        val defaultImageDrawable = ContextCompat.getDrawable(this, R.drawable.no_image)?.constantState
+
         // Image is required
-        if (binding.ivImageAdd.drawable == null) {
+        if (currentDrawable == null
+            || currentDrawable.constantState?.equals(defaultImageDrawable) == true
+        ) {
             val msg = getString(R.string.image_missing)
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
