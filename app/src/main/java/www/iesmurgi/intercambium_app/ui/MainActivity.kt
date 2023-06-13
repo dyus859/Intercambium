@@ -10,9 +10,10 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityMainBinding
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        setUserStatusListener()
+        setUserOnlineStatus()
     }
 
     /**
@@ -78,13 +79,20 @@ class MainActivity : AppCompatActivity() {
                 val userDocument = usersCollection.document(email)
 
                 userDocument.get().addOnSuccessListener { document ->
-                    SharedData.setUser(document.toUser())
+                    val sharedUser = document.toUser()
+                    SharedData.setUser(sharedUser)
+
+                    FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                        userDocument.update(Constants.USERS_FIELD_FCM_TOKEN, token).addOnSuccessListener {
+                            sharedUser.fcmToken = token
+                        }
+                    }
                 }
 
                 // Set online field to true when user signs in
                 userDocument.update(Constants.USERS_FIELD_ONLINE, true)
             } else {
-                setUserStatusListener()
+                setUserOnlineStatus()
                 SharedData.setUser(User())
             }
 
@@ -98,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         auth.addAuthStateListener(authStateListener)
     }
 
-    private fun setUserStatusListener(email: String? = null) {
+    private fun setUserOnlineStatus(email: String? = null) {
         val db = Firebase.firestore
         val usersCollection = db.collection(Constants.COLLECTION_USERS)
         var currentEmail = ""

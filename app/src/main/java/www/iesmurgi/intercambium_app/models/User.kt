@@ -1,22 +1,12 @@
 package www.iesmurgi.intercambium_app.models
 
-/**
- * Represents a user.
- *
- * @property email The email address of the user.
- * @property name The name of the user.
- * @property photoUrl The URL of the user's photo.
- * @property administrator Indicates if the user is an administrator.
- * @constructor Creates an instance of the [User] class.
- *
- * @author Denis Yushkin
- */
 data class User(
     val uid: String = "",
     val email: String = "",
     var name: String = "",
     var photoUrl: String = "",
     var online: Boolean = true,
+    var fcmToken: String = "",
     val administrator: Boolean = false,
 ) : java.io.Serializable {
 
@@ -26,9 +16,12 @@ data class User(
      * @param other The other [User] object to copy the properties from.
      */
     constructor(other: User) : this(
+        uid = other.uid,
         email = other.email,
         name = other.name,
         photoUrl = other.photoUrl,
+        online = other.online,
+        fcmToken = other.fcmToken,
         administrator = other.administrator,
     )
 

@@ -1,4 +1,4 @@
-package www.iesmurgi.intercambium_app.db
+package www.iesmurgi.intercambium_app.utils
 
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.Timestamp
@@ -10,8 +10,6 @@ import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.Message
 import www.iesmurgi.intercambium_app.models.User
-import www.iesmurgi.intercambium_app.utils.Constants
-import www.iesmurgi.intercambium_app.utils.SharedData
 import java.util.HashMap
 
 /**
@@ -135,9 +133,11 @@ class DbUtils {
             val uid = getString(Constants.USERS_FIELD_UID).orEmpty()
             val name = getString(Constants.USERS_FIELD_NAME).orEmpty()
             val photoUrl = getString(Constants.USERS_FIELD_PHOTO_URL).orEmpty()
+            val online = getBoolean(Constants.USERS_FIELD_ONLINE) ?: false
+            val fcmToken = getString(Constants.USERS_FIELD_FCM_TOKEN).orEmpty()
             val isAdministrator = getBoolean(Constants.USERS_FIELD_ADMINISTRATOR) ?: false
 
-            return User(uid, email, name, photoUrl, isAdministrator)
+            return User(uid, email, name, photoUrl, online, fcmToken, isAdministrator)
         }
 
         /**

@@ -16,8 +16,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.FragmentChatsBinding
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toMessage
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toMessage
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Chat
 import www.iesmurgi.intercambium_app.models.adapters.ChatAdapter
 import www.iesmurgi.intercambium_app.ui.ChatActivity

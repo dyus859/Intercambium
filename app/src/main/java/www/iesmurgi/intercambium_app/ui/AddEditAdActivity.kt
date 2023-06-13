@@ -21,9 +21,9 @@ import com.google.firebase.storage.FirebaseStorage
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityAddEditAdBinding
 import www.iesmurgi.intercambium_app.databinding.DialogEditImageBinding
-import www.iesmurgi.intercambium_app.db.DbUtils
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
+import www.iesmurgi.intercambium_app.utils.DbUtils
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toAd
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.Province
 import www.iesmurgi.intercambium_app.models.User

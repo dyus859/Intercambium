@@ -15,8 +15,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.FragmentHomeBinding
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toAd
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.models.adapters.AdAdapter
 import www.iesmurgi.intercambium_app.ui.AdActivity

@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityLoginEmailBinding
-import www.iesmurgi.intercambium_app.db.DbUtils
+import www.iesmurgi.intercambium_app.utils.DbUtils
 import www.iesmurgi.intercambium_app.utils.Constants
 
 /**

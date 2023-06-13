@@ -105,6 +105,11 @@ object Constants {
      */
     const val USERS_FIELD_ADMINISTRATOR = "administrator"
 
+    /**
+     * Field name for the fcm token of a user document.
+     */
+    const val USERS_FIELD_FCM_TOKEN = "fcmToken"
+
     /************************************************************
      ************************************************************
      ************************************************************/
@@ -200,4 +205,18 @@ object Constants {
 
     const val CHAT_SEND_ID = 1
     const val CHAT_RECEIVE_ID = 2
+
+    /************************************************************
+     ************************************************************
+     ************************************************************/
+
+    /**
+     * Type for a notification related to main content.
+     */
+    const val NOTIFICATION_TYPE_MAIN = "main"
+
+    /**
+     * Type for a notification related to chat message.
+     */
+    const val NOTIFICATION_TYPE_CHAT = "chat"
 }

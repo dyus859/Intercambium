@@ -15,7 +15,7 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.FragmentProfileBinding
-import www.iesmurgi.intercambium_app.db.DbUtils
+import www.iesmurgi.intercambium_app.utils.DbUtils
 import www.iesmurgi.intercambium_app.ui.ConfigurationActivity
 import www.iesmurgi.intercambium_app.ui.LoginEmailActivity
 import www.iesmurgi.intercambium_app.ui.MyAdsActivity

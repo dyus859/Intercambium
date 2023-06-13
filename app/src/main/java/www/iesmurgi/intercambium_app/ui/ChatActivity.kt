@@ -22,13 +22,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityChatBinding
-import www.iesmurgi.intercambium_app.db.DbUtils
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toMessage
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toMessage
 import www.iesmurgi.intercambium_app.models.Message
 import www.iesmurgi.intercambium_app.models.User
 import www.iesmurgi.intercambium_app.models.adapters.MessagesAdapter
-import www.iesmurgi.intercambium_app.utils.Constants
-import www.iesmurgi.intercambium_app.utils.Utils
+import www.iesmurgi.intercambium_app.utils.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -48,6 +46,8 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var dialog: ProgressDialog
     private lateinit var senderUid: String
     private lateinit var receiverUid: String
+
+    private lateinit var senderUser: User
     private lateinit var receiverUser: User
 
     private var latestImgUri: Uri? = null
@@ -61,6 +61,7 @@ class ChatActivity : AppCompatActivity() {
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        senderUser = SharedData.getUser().value!!
         receiverUser = intent.getSerializableExtra("USER") as User
         database = Firebase.firestore
         storage = Firebase.storage
@@ -374,6 +375,20 @@ class ChatActivity : AppCompatActivity() {
 
         senderRoomRef.collection(Constants.CHATS_COLLECTION_MESSAGES).document(messageId).set(msgData)
         receiverRoomRef.collection(Constants.CHATS_COLLECTION_MESSAGES).document(messageId).set(msgData)
+
+        val notificationMsg = if (imageUrl.isEmpty()) {
+            getString(R.string.notification_message_sent, senderUser.name, message.content)
+        } else {
+            getString(R.string.notification_image_sent, senderUser.name)
+        }
+
+        // Send the notification
+        FCMHelper.sendNotificationToDevice(
+            receiverUser.fcmToken,
+            notificationMsg,
+            Constants.NOTIFICATION_TYPE_CHAT,
+            senderUser
+        )
     }
 
     /**

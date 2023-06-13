@@ -13,8 +13,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityAdBinding
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toAd
-import www.iesmurgi.intercambium_app.db.DbUtils.Companion.toUser
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toAd
+import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.utils.Constants
 import www.iesmurgi.intercambium_app.utils.SharedData
@@ -308,6 +308,17 @@ class AdActivity : AppCompatActivity() {
                 // Hide Swipe Refresh animation
                 binding.swipeRefreshLayoutAd.isRefreshing = false
 
+                if (status == Constants.AD_STATUS_PUBLISHED) {
+                    // Send the notification
+                    val notificationMsg = getString(R.string.notification_ad_published, ad.title)
+                    FCMHelper.sendNotificationToDevice(
+                        ad.author.fcmToken,
+                        notificationMsg,
+                        Constants.NOTIFICATION_TYPE_MAIN,
+                        null,
+                    )
+                }
+
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 handleActionsVisibility(status)
             }
@@ -326,8 +337,6 @@ class AdActivity : AppCompatActivity() {
         // Show Swipe Refresh animation
         binding.swipeRefreshLayoutAd.isRefreshing = true
 
-        println("imgUrl: $imgUrl")
-
         adsCollection.document(id)
             .delete()
             .addOnCompleteListener { task ->
@@ -342,6 +351,15 @@ class AdActivity : AppCompatActivity() {
                 } else {
                     getString(R.string.error_operation_could_not_be_done)
                 }
+
+                // Send the notification
+                val notificationMsg = getString(R.string.notification_ad_deleted, ad.title)
+                FCMHelper.sendNotificationToDevice(
+                    ad.author.fcmToken,
+                    notificationMsg,
+                    Constants.NOTIFICATION_TYPE_MAIN,
+                    null,
+                )
 
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 finish()

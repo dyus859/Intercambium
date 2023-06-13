@@ -80,4 +80,8 @@
     <string name="this_message_is_deleted">Este mensaje fue eliminado.</string>
     <string name="no_chats">No hay chats</string>
     <string name="search_chats_hint">Buscar chat…</string>
+    <string name="notification_message_sent">%1$s: %2$s</string>
+    <string name="notification_image_sent">%1$s te ha enviado una imagen.</string>
+    <string name="notification_ad_published">Tu anuncio "%1$s" ha sido publicado.</string>
+    <string name="notification_ad_deleted">Tu anuncio "%1$s" ha sido eliminado.</string>
 </resources>
