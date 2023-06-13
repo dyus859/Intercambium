@@ -104,6 +104,10 @@ object Utils {
      * @param url The URL of the image file to be deleted.
      */
     fun deleteFirebaseImage(url: String) {
+        if (url.isEmpty()) {
+            return
+        }
+
         // Create a FirebaseStorage instance
         val storage = FirebaseStorage.getInstance()
 
