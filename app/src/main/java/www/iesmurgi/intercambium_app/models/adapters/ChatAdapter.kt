@@ -2,6 +2,7 @@ package www.iesmurgi.intercambium_app.models.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -43,7 +44,22 @@ class ChatAdapter(
         fun bind(chat: Chat) {
             with(itemBinding) {
                 tvChatUserName.text = chat.receiverUser.name
-                tvChatUserLastMessage.text = chat.lastMsg
+
+                // If the latest message is text, set text
+                if (chat.lastMsg.isNotEmpty()) {
+                    tvChatUserLastMessage.visibility = View.VISIBLE
+                    ivChatUserLastImg.visibility = View.GONE
+
+                    tvChatUserLastMessage.text = chat.lastMsg
+                } else if (chat.lastImageUrl.isNotEmpty()) {
+                    tvChatUserLastMessage.visibility = View.GONE
+                    ivChatUserLastImg.visibility = View.VISIBLE
+
+                    Glide.with(context)
+                        .load(chat.lastImageUrl)
+                        .placeholder(R.drawable.no_image)
+                        .into(ivChatUserLastImg)
+                }
 
                 // Load receiver's profile picture
                 if (chat.receiverUser.photoUrl.isNotEmpty()) {

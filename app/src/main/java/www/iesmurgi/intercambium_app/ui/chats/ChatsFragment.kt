@@ -195,7 +195,12 @@ class ChatsFragment : Fragment() {
 
                                             val latestMessage = latestMessageDocument?.toMessage()
 
-                                            val chat = Chat(chatId, user, latestMessage?.content ?: "")
+                                            val chat = Chat(
+                                                chatId,
+                                                user,
+                                                latestMessage?.content ?: "",
+                                                latestMessage?.imageUrl ?: ""
+                                            )
                                             chatList.add(chat)
 
                                             // Check if all tasks have completed

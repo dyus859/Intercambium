@@ -4,4 +4,5 @@ data class Chat(
     var id: String = "",
     val receiverUser: User = User(),
     val lastMsg: String = "",
+    val lastImageUrl: String = "",
 ) : java.io.Serializable
