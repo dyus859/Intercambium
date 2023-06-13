@@ -76,26 +76,6 @@ class ChatActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
     }
 
-    override fun onStop() {
-        super.onStop()
-        setUserOnlineStatus(online = false)
-    }
-
-    /**
-     * Sets the online status of the user.
-     *
-     * @param online Boolean value indicating the online status.
-     */
-    private fun setUserOnlineStatus(online: Boolean) {
-        val db = Firebase.firestore
-        db.collection(Constants.COLLECTION_USERS)
-            .document(senderUser.email)
-            .update(Constants.USERS_FIELD_ONLINE, online)
-            .addOnSuccessListener {
-                senderUser.online = online
-            }
-    }
-
     override fun onCreateContextMenu(
         menu: ContextMenu?,
         v: View?,
@@ -398,8 +378,6 @@ class ChatActivity : AppCompatActivity() {
 
         senderRoomRef.collection(Constants.CHATS_COLLECTION_MESSAGES).document(messageId).set(msgData)
         receiverRoomRef.collection(Constants.CHATS_COLLECTION_MESSAGES).document(messageId).set(msgData)
-
-        setUserOnlineStatus(true)
 
         if (senderUid != receiverUid) {
             val notificationMsg = if (imageUrl.isEmpty()) {
