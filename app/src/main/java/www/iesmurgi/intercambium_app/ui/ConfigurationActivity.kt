@@ -143,17 +143,16 @@ class ConfigurationActivity : AppCompatActivity() {
                     tieUserNewPassword.requestFocus()
                 } else {
                     validateCurrentPassword(currentPassword) { isValid ->
-                        if (isValid) {
-                            updatePassword(newPassword)
-                        } else {
+                        if (!isValid) {
                             val msg = getString(R.string.error_edit_password_invalid_current_password)
                             tieUserCurrentPassword.error = msg
                             tieUserCurrentPassword.requestFocus()
+                        } else {
+                            updatePassword(newPassword)
+                            alertDialog.dismiss()
                         }
                     }
                 }
-
-                alertDialog.dismiss()
             }
         }
     }
@@ -215,11 +214,17 @@ class ConfigurationActivity : AppCompatActivity() {
                 if (text.isEmpty()) {
                     tieUserName.error = required
                     tieUserName.requestFocus()
+                } else if (text.length < Constants.MIN_NAME_LENGTH) {
+                    tieUserName.error = getString(R.string.error_name_too_short, Constants.MIN_NAME_LENGTH)
+                    tieUserName.requestFocus()
+                } else if (text.length > Constants.MAX_NAME_LENGTH) {
+                    tieUserName.error = getString(R.string.error_name_too_long,
+                        text.length, Constants.MAX_NAME_LENGTH)
+                    tieUserName.requestFocus()
                 } else {
                     updateValueDB(Constants.USERS_FIELD_NAME, text)
+                    alertDialog.dismiss()
                 }
-
-                alertDialog.dismiss()
             }
         }
     }
@@ -411,18 +416,14 @@ class ConfigurationActivity : AppCompatActivity() {
 
         val firebaseAuthUser = FirebaseAuth.getInstance().currentUser
 
-        if (firebaseAuthUser != null) {
-            firebaseAuthUser.delete()
-                .addOnSuccessListener {
-                    val msg = getString(R.string.delete_account_success)
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        firebaseAuthUser?.delete()?.addOnSuccessListener {
+            val msg = getString(R.string.delete_account_success)
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
-                    signOut()
-                }
-                .addOnFailureListener {
-                    val msg = getString(R.string.delete_account_failed)
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-                }
+            signOut()
+        }?.addOnFailureListener {
+            val msg = getString(R.string.delete_account_failed)
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
     }
 

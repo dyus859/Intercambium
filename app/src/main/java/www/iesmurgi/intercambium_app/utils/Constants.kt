@@ -140,6 +140,16 @@ object Constants {
     const val MAX_DESCRIPTION_LENGTH = 256
 
     /**
+     * Minimum length of the name for user.
+     */
+    const val MIN_NAME_LENGTH = 3
+
+    /**
+     * Maximum length of the name for user.
+     */
+    const val MAX_NAME_LENGTH = 32
+
+    /**
      * Path for storing ads in the storage.
      */
     const val STORAGE_ADS_IMAGES_PATH = "ads/"
