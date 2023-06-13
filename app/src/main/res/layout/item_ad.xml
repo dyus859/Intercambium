@@ -12,7 +12,7 @@
     <LinearLayout
         android:id="@+id/cv_ad_container"
         android:layout_width="match_parent"
-        android:layout_height="324dp"
+        android:layout_height="wrap_content"
         android:baselineAligned="false"
         android:orientation="vertical"
         android:padding="16dp">
