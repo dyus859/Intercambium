@@ -46,6 +46,7 @@ class DbUtils {
             return hashMapOf(
                 Constants.ADS_FIELD_TITLE to ad.title,
                 Constants.ADS_FIELD_DESCRIPTION to ad.description,
+                Constants.ADS_FIELD_RATING to ad.rating,
                 Constants.ADS_FIELD_PROVINCE to ad.province,
                 Constants.ADS_FIELD_STATUS to ad.status,
                 Constants.ADS_FIELD_CREATED_AT to ad.createdAt,
@@ -156,12 +157,13 @@ class DbUtils {
             val id = id
             val title = getString(Constants.ADS_FIELD_TITLE).orEmpty()
             val description = getString(Constants.ADS_FIELD_DESCRIPTION).orEmpty()
+            val rating = getDouble(Constants.ADS_FIELD_RATING) ?: 0.0
             val province = getString(Constants.ADS_FIELD_PROVINCE).orEmpty()
             val status = getString(Constants.ADS_FIELD_STATUS).orEmpty()
             val createdAt = getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
             val imgUrl = getString(Constants.ADS_FIELD_IMAGE).orEmpty()
 
-            return Ad(id, title, description, province, status, createdAt, imgUrl, author)
+            return Ad(id, title, description, rating, province, status, createdAt, imgUrl, author)
         }
 
         /**

@@ -8,6 +8,7 @@ import www.iesmurgi.intercambium_app.utils.Constants
  * @property id The unique identifier of the ad.
  * @property title The title of the ad.
  * @property description The description of the ad.
+ * @property rating The rating of the ad.
  * @property province The province associated with the ad.
  * @property status The status of the ad.
  * @property createdAt The creation timestamp of the ad.
@@ -22,6 +23,7 @@ data class Ad(
     var id: String = "",
     var title: String = "",
     var description: String = "",
+    var rating: Double = 0.0,
     var province: String = "",
     var status: String = Constants.AD_STATUS_IN_REVISION,
     @Transient

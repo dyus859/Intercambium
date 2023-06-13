@@ -44,15 +44,38 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/tv_ad_value_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textAlignment="center"
+                android:text="@string/article_value"
+                android:textSize="17sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_edit_image_ad" />
+
+            <RatingBar
+                android:id="@+id/rating_bar_ad"
+                android:layout_width="240dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:theme="@style/MyRatingBar"
+                android:numStars="5"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_ad_value_title" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_ad_title"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/iv_image_add">
+                app:layout_constraintTop_toBottomOf="@id/rating_bar_ad">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/tie_ad_title"
@@ -105,7 +128,6 @@
                     android:hint="@string/hint_province" />
 
             </com.google.android.material.textfield.TextInputLayout>
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

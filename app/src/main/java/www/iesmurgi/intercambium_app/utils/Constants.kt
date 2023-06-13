@@ -27,6 +27,11 @@ object Constants {
     const val ADS_FIELD_DESCRIPTION = "description"
 
     /**
+     * Field name for the rating of an ad document.
+     */
+    const val ADS_FIELD_RATING = "rating"
+
+    /**
      * Field name for the province of an ad document.
      */
     const val ADS_FIELD_PROVINCE = "province"

@@ -186,6 +186,8 @@ class AdActivity : AppCompatActivity() {
             handleActionsVisibility(ad.status)
 
             // Set content
+            ratingBarAdInfo.rating = ad.rating.toFloat()
+            tvItemAdTimeInfo.text = Utils.formatUnixTime(ad.createdAt)
             tvItemAdLocation.text = ad.province
             tvItemAdTitleInfo.text = ad.title
             tvItemAdDescriptionInfo.text = ad.description

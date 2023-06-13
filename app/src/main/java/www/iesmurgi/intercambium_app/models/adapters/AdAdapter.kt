@@ -11,6 +11,7 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ItemAdBinding
 import www.iesmurgi.intercambium_app.models.Ad
 import www.iesmurgi.intercambium_app.utils.Constants
+import www.iesmurgi.intercambium_app.utils.Utils
 
 /**
  * [androidx.recyclerview.widget.RecyclerView] adapter for displaying ads.
@@ -54,6 +55,8 @@ class AdAdapter(
                 ivAdHidden.visibility = View.GONE
             }
 
+            ratingBarAdItem.rating = ad.rating.toFloat()
+            tvItemAdTime.text = Utils.formatUnixTime(ad.createdAt)
             tvItemAdTitle.text = ad.title
             tvItemAdDescription.text = ad.description
             tvItemAdUserName.text = ad.author.name

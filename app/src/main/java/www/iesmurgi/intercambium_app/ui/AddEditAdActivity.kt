@@ -270,6 +270,7 @@ class AddEditAdActivity : AppCompatActivity() {
         binding.pbAddEditAd.hide()
 
         // Set content
+        binding.ratingBarAd.rating = ad.rating.toFloat()
         binding.tieAdTitle.setText(ad.title)
         binding.tieAdDescription.setText(ad.description)
 
@@ -388,6 +389,15 @@ class AddEditAdActivity : AppCompatActivity() {
      * @return `true` if the input data is valid, `false` otherwise.
      */
     private fun validInputData(title: String, description: String): Boolean {
+        val rating = binding.ratingBarAd.rating
+
+        if (rating == 0.0f) {
+            val msg = getString(R.string.rating_required)
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+            return false
+        }
+
         if (title.length < Constants.MIN_TITLE_LENGTH) {
             binding.tieAdTitle.error = getString(R.string.error_title_min_length,
                 Constants.MIN_TITLE_LENGTH)
@@ -453,6 +463,7 @@ class AddEditAdActivity : AppCompatActivity() {
      * Validates the input fields and updates or publishes the ad.
      */
     private fun onSaveClick() {
+        val rating = binding.ratingBarAd.rating.toDouble()
         val title = binding.tieAdTitle.text.toString().trim()
         val description = binding.tieAdDescription.text.toString().trim()
 
@@ -470,7 +481,7 @@ class AddEditAdActivity : AppCompatActivity() {
             ""
         }
 
-        val tempAd = Ad(tempAdId, title, description, selectedProvinceName)
+        val tempAd = Ad(tempAdId, title, description, rating, selectedProvinceName)
         tempAd.author = User(SharedData.getUser().value!!)
 
         if (isEditing()) {

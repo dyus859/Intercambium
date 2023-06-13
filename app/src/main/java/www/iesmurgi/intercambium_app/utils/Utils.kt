@@ -17,6 +17,7 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.DialogConfirmationBinding
 import www.iesmurgi.intercambium_app.models.Ad
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -192,5 +193,17 @@ object Utils {
                 alertDialog.dismiss()
             }
         }
+    }
+
+    /**
+     * Formats a Unix time value to a string representation of date and time.
+     *
+     * @param unixTime The Unix time value to be formatted.
+     * @return The formatted string representing the date and time.
+     */
+    fun formatUnixTime(unixTime: Long): String {
+        val date = Date(unixTime) // Convert Unix time to milliseconds
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return dateFormat.format(date)
     }
 }

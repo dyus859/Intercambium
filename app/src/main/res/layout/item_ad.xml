@@ -12,9 +12,9 @@
     <LinearLayout
         android:id="@+id/cv_ad_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
+        android:layout_height="324dp"
         android:baselineAligned="false"
+        android:orientation="vertical"
         android:padding="16dp">
 
         <LinearLayout
@@ -27,8 +27,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                android:src="@drawable/no_image" />
+                android:src="@drawable/no_image"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <RatingBar
+                android:id="@+id/rating_bar_ad_item"
+                style="?android:attr/ratingBarStyleIndicator"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:theme="@style/MyRatingBar"
+                android:numStars="5" />
 
         </LinearLayout>
 
@@ -42,21 +59,36 @@
                 android:id="@+id/siv_item_ad_user_photo"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:maxHeight="32dp"
+                android:maxWidth="32dp"
                 android:gravity="center_vertical"
                 android:scaleType="centerCrop"
-                app:shapeAppearanceOverlay="@style/roundedImageViewRounded50"
-                android:src="@drawable/default_avatar" />
+                android:src="@drawable/default_avatar"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded50" />
 
             <TextView
                 android:id="@+id/tv_item_ad_user_name"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
                 android:layout_marginStart="8dp"
+                android:layout_weight="8"
+                android:gravity="center_vertical"
+                android:text="Person Name"
                 android:textColor="@color/black"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:text="Person Name"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tv_item_ad_time"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="4"
+                android:gravity="center_vertical|end"
+                android:text="Time"
+                android:textColor="@color/charcoal_gray"
+                android:textSize="11sp"
                 tools:ignore="HardcodedText" />
 
         </LinearLayout>
@@ -78,17 +110,18 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:src="@drawable/ic_hidden_24"
-                    android:visibility="gone"/>
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
                     android:id="@+id/tv_item_ad_title"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
+                    android:text="Title"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:text="Title"
                     tools:ignore="HardcodedText" />
 
             </LinearLayout>
@@ -97,13 +130,13 @@
             <TextView
                 android:id="@+id/tv_item_ad_description"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:gravity="center_vertical"
+                android:text="Description"
                 android:textColor="@color/dimgray"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:text="Description"
                 tools:ignore="HardcodedText" />
 
         </LinearLayout>
