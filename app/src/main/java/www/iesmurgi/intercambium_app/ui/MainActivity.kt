@@ -87,6 +87,11 @@ class MainActivity : AppCompatActivity() {
                 setUserStatusListener()
                 SharedData.setUser(User())
             }
+
+            // Update the visibility of "Chats" menu item based on the current user status
+            val navView: BottomNavigationView = binding.navView
+            val menu = navView.menu
+            menu.findItem(R.id.navigation_chats).isVisible = user != null
         }
 
         // Register the listener with FirebaseAuth
