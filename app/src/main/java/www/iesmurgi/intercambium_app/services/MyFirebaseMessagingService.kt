@@ -106,11 +106,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .setSound(notificationSoundUri)
             .setContentIntent(pendingIntent)
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
+                as NotificationManager
 
         // Check if the device is running Android Oreo or higher
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
+            val channel = NotificationChannel(channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
                 enableLights(true)
                 lightColor = Color.BLUE
                 enableVibration(true)

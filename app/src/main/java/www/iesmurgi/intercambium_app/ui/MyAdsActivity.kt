@@ -129,7 +129,12 @@ class MyAdsActivity : AppCompatActivity() {
                     isLoadingMore = true
 
                     if (filtering) {
-                        val query = if (binding.svMyAds.query.isNullOrBlank()) "" else binding.svMyAds.query.toString().trim()
+                        val query = if (binding.svMyAds.query.isNullOrBlank()) {
+                            ""
+                        } else {
+                            binding.svMyAds.query.toString().trim()
+                        }
+
                         loadAdsFromDB(query, loadMore = true)
                     } else {
                         loadAdsFromDB("", loadMore = true)
