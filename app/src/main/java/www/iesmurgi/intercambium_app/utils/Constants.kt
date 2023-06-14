@@ -71,6 +71,16 @@ object Constants {
      */
     const val AD_STATUS_PUBLISHED = "published"
 
+    /**
+     * How many ads should be loaded in the first load.
+     */
+    const val ADS_INITIAL_LOAD_COUNT = 20
+
+    /**
+     * How many more ads should be loaded.
+     */
+    const val ADS_MORE_COUNT = 20
+
     /************************************************************
      ************************************************************
      ************************************************************/

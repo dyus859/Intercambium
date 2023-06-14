@@ -1,6 +1,7 @@
 package www.iesmurgi.intercambium_app.ui.home
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,6 +43,9 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: AdAdapter
     private var filtering = false
 
+    // Keep track of whether more ads are being loaded
+    private var isLoadingMore = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -68,6 +72,7 @@ class HomeFragment : Fragment() {
     private fun setupUIComponents() {
         handleAddButton()
         handleSwipeRefresh()
+        handleRecyclerViewScrollListener()
         handleSearchView()
     }
 
@@ -133,6 +138,20 @@ class HomeFragment : Fragment() {
     }
 
     /**
+     * Sets up the scroll listener for the RecyclerView to handle infinite scrolling.
+     */
+    private fun handleRecyclerViewScrollListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            binding.rvAdsHome.setOnScrollChangeListener { _, _, _, _, _ ->
+                if (!binding.rvAdsHome.canScrollVertically(1) && !isLoadingMore) {
+                    isLoadingMore = true
+                    loadAdsFromDB(query = "", loadMore = true)
+                }
+            }
+        }
+    }
+
+    /**
      * Sets up the search functionality for the search view.
      */
     private fun handleSearchView() {
@@ -165,7 +184,7 @@ class HomeFragment : Fragment() {
      *
      * @param query The search query string. Default is an empty string.
      */
-    private fun loadAdsFromDB(query: String = "") {
+    private fun loadAdsFromDB(query: String = "", loadMore: Boolean = false) {
         val isNetWorkAvailable = Utils.isNetworkAvailable(requireContext())
 
         if (!isNetWorkAvailable) {
@@ -175,12 +194,19 @@ class HomeFragment : Fragment() {
             return
         }
 
-        // Show Swipe Refresh animation
         binding.swipeRefreshLayoutHome.isRefreshing = true
 
         val db = Firebase.firestore
         val adsCollection = db.collection(Constants.COLLECTION_ADS)
         val queryTask = adsCollection.orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
+
+        // Only load limited ads initially
+        var limit = Constants.ADS_INITIAL_LOAD_COUNT
+
+        if (loadMore) {
+            // If loading more ads, increase the limit
+            limit += Constants.ADS_MORE_COUNT
+        }
 
         if (query.isNotEmpty()) {
             // Create both tasks (documents containing title and documents containing description)
@@ -206,7 +232,7 @@ class HomeFragment : Fragment() {
                         println(timestamp)
                         java.util.Date(timestamp)
                     }
-                    processQueryResults(sortedDocuments)
+                    processQueryResults(sortedDocuments, loadMore)
                 }
                 .addOnFailureListener {
                     handleNoAdsMsg()
@@ -214,8 +240,8 @@ class HomeFragment : Fragment() {
         } else {
             // There is no query, execute it directly
 
-            queryTask.get().addOnSuccessListener { adDocuments ->
-                processQueryResults(adDocuments.documents)
+            queryTask.limit(limit.toLong()).get().addOnSuccessListener { adDocuments ->
+                processQueryResults(adDocuments.documents, loadMore)
             }.addOnFailureListener {
                 handleNoAdsMsg()
             }
@@ -227,12 +253,25 @@ class HomeFragment : Fragment() {
      *
      * @param adDocuments The list of ad documents from the query result.
      */
-    private fun processQueryResults(adDocuments: List<DocumentSnapshot>) {
+    private fun processQueryResults(adDocuments: List<DocumentSnapshot>, loadMore: Boolean = false) {
+        // Clear the existing ad list only if it's not a load more operation
+        if (!loadMore) {
+            adapter.adList.clear()
+        }
+
         val db = Firebase.firestore
         val usersCollection = db.collection(Constants.COLLECTION_USERS)
 
         // Create a list to hold the new ad items
         val newAdList = mutableListOf<Ad>()
+
+        // Add new ad items to the ad list
+        newAdList.forEachIndexed { index, ad ->
+            if (!loadMore || index >= adapter.adList.size) {
+                // Only add new ads or if it's a load more operation, add ads beyond the current list size
+                adapter.adList.add(ad)
+            }
+        }
 
         // Create a HashSet to keep track of unique ad IDs
         val uniqueAdIds = HashSet<String>()
@@ -292,6 +331,8 @@ class HomeFragment : Fragment() {
         if (!isAdded) {
             return
         }
+
+        isLoadingMore = false
 
         with(binding) {
             // Hide Swipe Refresh animation

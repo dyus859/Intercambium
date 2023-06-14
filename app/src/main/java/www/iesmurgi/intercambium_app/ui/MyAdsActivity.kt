@@ -2,6 +2,7 @@ package www.iesmurgi.intercambium_app.ui
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -14,6 +15,11 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityMyAdsBinding
 import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toAd
@@ -37,6 +43,9 @@ class MyAdsActivity : AppCompatActivity() {
 
     private lateinit var user: User
 
+    // Keep track of whether more ads are being loaded
+    private var isLoadingMore = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMyAdsBinding.inflate(layoutInflater)
@@ -59,6 +68,7 @@ class MyAdsActivity : AppCompatActivity() {
      */
     private fun setupUIComponents() {
         handleSwipeRefresh()
+        handleRecyclerViewScrollListener()
         handleSearchView()
     }
 
@@ -110,6 +120,20 @@ class MyAdsActivity : AppCompatActivity() {
     }
 
     /**
+     * Sets up the scroll listener for the RecyclerView to handle infinite scrolling.
+     */
+    private fun handleRecyclerViewScrollListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            binding.rvAdsMyAds.setOnScrollChangeListener { _, _, _, _, _ ->
+                if (!binding.rvAdsMyAds.canScrollVertically(1) && !isLoadingMore) {
+                    isLoadingMore = true
+                    loadAdsFromDB(query = "", loadMore = true)
+                }
+            }
+        }
+    }
+
+    /**
      * Sets up the search functionality for the search view.
      */
     private fun handleSearchView() {
@@ -142,7 +166,7 @@ class MyAdsActivity : AppCompatActivity() {
      *
      * @param query The search query string. Default is an empty string.
      */
-    private fun loadAdsFromDB(query: String = "") {
+    private fun loadAdsFromDB(query: String = "", loadMore: Boolean = false) {
         val isNetWorkAvailable = Utils.isNetworkAvailable(this)
 
         if (!isNetWorkAvailable) {
@@ -152,7 +176,6 @@ class MyAdsActivity : AppCompatActivity() {
             return
         }
 
-        // Show Swipe Refresh animation
         binding.swipeRefreshLayoutMyAds.isRefreshing = true
 
         val db = Firebase.firestore
@@ -161,13 +184,23 @@ class MyAdsActivity : AppCompatActivity() {
             .orderBy(Constants.ADS_FIELD_CREATED_AT, Query.Direction.DESCENDING)
             .whereEqualTo(Constants.ADS_FIELD_AUTHOR, user.email)
 
+        // Only load limited ads initially
+        var limit = Constants.ADS_INITIAL_LOAD_COUNT
+
+        if (loadMore) {
+            // If loading more ads, increase the limit
+            limit += Constants.ADS_MORE_COUNT
+        }
+
         if (query.isNotEmpty()) {
+            // Create both tasks (documents containing title and documents containing description)
             val titleQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_TITLE_SEARCH, query)
             val descriptionQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_DESCRIPTION_SEARCH, query)
 
             val titleTask = titleQuery.get()
             val descriptionTask = descriptionQuery.get()
 
+            // Execute both tasks first, then listen
             Tasks.whenAllSuccess<List<DocumentSnapshot>>(titleTask, descriptionTask)
                 .addOnSuccessListener { results ->
                     val titleDocuments = results[0] as QuerySnapshot
@@ -180,25 +213,22 @@ class MyAdsActivity : AppCompatActivity() {
                     // Sort by created_at field (descending order) to always show the newest
                     val sortedDocuments = mergedDocuments.sortedByDescending {
                         val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
+                        println(timestamp)
                         java.util.Date(timestamp)
                     }
-                    processQueryResults(sortedDocuments)
+                    processQueryResults(sortedDocuments, loadMore)
                 }
                 .addOnFailureListener {
                     handleNoAdsMsg()
                 }
         } else {
-            queryTask.get()
-                .addOnSuccessListener { adDocuments ->
-                    val sortedDocuments = adDocuments.documents.sortedByDescending {
-                        val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
-                        java.util.Date(timestamp)
-                    }
-                    processQueryResults(sortedDocuments)
-                }
-                .addOnFailureListener {
-                    handleNoAdsMsg()
-                }
+            // There is no query, execute it directly
+
+            queryTask.limit(limit.toLong()).get().addOnSuccessListener { adDocuments ->
+                processQueryResults(adDocuments.documents, loadMore)
+            }.addOnFailureListener {
+                handleNoAdsMsg()
+            }
         }
     }
 
@@ -207,43 +237,71 @@ class MyAdsActivity : AppCompatActivity() {
      *
      * @param adDocuments The list of ad documents from the query result.
      */
-    private fun processQueryResults(adDocuments: List<DocumentSnapshot>) {
+    private fun processQueryResults(adDocuments: List<DocumentSnapshot>, loadMore: Boolean = false) {
+        // Clear the existing ad list only if it's not a load more operation
+        if (!loadMore) {
+            adapter.adList.clear()
+        }
+
         val db = Firebase.firestore
         val usersCollection = db.collection(Constants.COLLECTION_USERS)
 
         // Create a list to hold the new ad items
         val newAdList = mutableListOf<Ad>()
 
-        // Process each ad document in parallel
-        val tasks = adDocuments.map { adDocument ->
+        // Add new ad items to the ad list
+        newAdList.forEachIndexed { index, ad ->
+            if (!loadMore || index >= adapter.adList.size) {
+                // Only add new ads or if it's a load more operation, add ads beyond the current list size
+                adapter.adList.add(ad)
+            }
+        }
+
+        // Create a HashSet to keep track of unique ad IDs
+        val uniqueAdIds = HashSet<String>()
+
+        // Create a coroutine scope
+        val coroutineScope = CoroutineScope(Dispatchers.Main)
+
+        // Create a suspend function to process each ad document
+        suspend fun processAdDocument(adDocument: DocumentSnapshot) {
             val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
             val usersDocument = usersCollection.document(author)
-            usersDocument.get().addOnSuccessListener { userDocument ->
-                // If this account doesn't exist anymore, don't show the ad
-                if (userDocument.exists()) {
-                    val user = userDocument.toUser()
-                    val ad = adDocument.toAd(user)
+            val userDocument = withContext(Dispatchers.IO) { usersDocument.get().await() }
 
-                    if (Utils.isAdVisibleForUser(ad)) {
-                        newAdList.add(ad)
-                    }
+            // If this account doesn't exist anymore, don't show the ad
+            if (userDocument.exists()) {
+                val user = userDocument.toUser()
+                val ad = adDocument.toAd(user)
+
+                if (Utils.isAdVisibleForUser(ad) && !uniqueAdIds.contains(ad.id)) {
+                    newAdList.add(ad)
+                    uniqueAdIds.add(ad.id)
                 }
             }
         }
 
-        // Wait for all tasks to complete
-        Tasks.whenAllSuccess<DocumentSnapshot>(tasks)
-            .addOnCompleteListener {
-                // Clear the existing ad list and add the new ad items
-                adapter.adList.clear()
-                adapter.adList.addAll(newAdList)
-
-                // Notify the adapter of the changes
-                adapter.notifyDataSetChanged()
-
-                // Handle no ads message
-                handleNoAdsMsg()
+        // Create a suspend function to process all ad documents sequentially
+        suspend fun processAllAdDocuments() {
+            for (adDocument in adDocuments) {
+                processAdDocument(adDocument)
             }
+        }
+
+        // Start the coroutine to process all ad documents sequentially
+        coroutineScope.launch {
+            processAllAdDocuments()
+
+            // Clear the existing ad list and add the new ad items
+            adapter.adList.clear()
+            adapter.adList.addAll(newAdList)
+
+            // Notify the adapter of the changes
+            adapter.notifyDataSetChanged()
+
+            // Handle no ads message
+            handleNoAdsMsg()
+        }
 
         if (adDocuments.isEmpty()) {
             handleNoAdsMsg()
