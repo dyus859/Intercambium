@@ -331,6 +331,10 @@ class ChatActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+                return@setOnClickListener
+            }
+
             // Save the message
             createNewMessageDocument(content)
 
@@ -423,6 +427,10 @@ class ChatActivity : AppCompatActivity() {
      * @param uri The URI of the image to be uploaded.
      */
     private fun uploadImageMessage(uri: Uri) {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         val directory = Constants.STORAGE_CHATS_IMAGES_PATH
         val imgReference = Utils.getImgPath(this, uri, directory)
         val storageReference = FirebaseStorage.getInstance().getReference(imgReference)

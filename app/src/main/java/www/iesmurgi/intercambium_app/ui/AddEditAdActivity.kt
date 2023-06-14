@@ -436,6 +436,10 @@ class AddEditAdActivity : AppCompatActivity() {
             return
         }
 
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         // Disable saving option for now
         canSave = false
 

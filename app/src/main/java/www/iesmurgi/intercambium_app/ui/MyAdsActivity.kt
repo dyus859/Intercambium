@@ -14,6 +14,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityMyAdsBinding
 import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toAd
 import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toUser
@@ -47,7 +48,6 @@ class MyAdsActivity : AppCompatActivity() {
         user = SharedData.getUser().value!!
         setupUIComponents()
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -143,6 +143,15 @@ class MyAdsActivity : AppCompatActivity() {
      * @param query The search query string. Default is an empty string.
      */
     private fun loadAdsFromDB(query: String = "") {
+        val isNetWorkAvailable = Utils.isNetworkAvailable(this)
+
+        if (!isNetWorkAvailable) {
+            binding.swipeRefreshLayoutMyAds.isRefreshing = false
+            binding.tvNoAdsMyAds.text = getString(R.string.no_access_to_internet)
+            binding.tvNoAdsMyAds.visibility = View.VISIBLE
+            return
+        }
+
         // Show Swipe Refresh animation
         binding.swipeRefreshLayoutMyAds.isRefreshing = true
 
@@ -249,6 +258,7 @@ class MyAdsActivity : AppCompatActivity() {
             // Hide Swipe Refresh animation
             swipeRefreshLayoutMyAds.isRefreshing = false
 
+            tvNoAdsMyAds.text = getString(R.string.no_ads)
             tvNoAdsMyAds.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
         }
     }

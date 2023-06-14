@@ -9,6 +9,7 @@ import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.ActivityLoginEmailBinding
 import www.iesmurgi.intercambium_app.utils.DbUtils
 import www.iesmurgi.intercambium_app.utils.Constants
+import www.iesmurgi.intercambium_app.utils.Utils
 
 /**
  * Activity for email-based login and registration.
@@ -63,6 +64,10 @@ class LoginEmailActivity : AppCompatActivity() {
      * @param signIn True if signing in, false if signing up.
      */
     private fun tryActionButton(signIn: Boolean) {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         val email = binding.tieEmailLogin.text.toString()
         val password = binding.tiePasswordLogin.text.toString()
         val required = getString(R.string.required)
@@ -148,6 +153,10 @@ class LoginEmailActivity : AppCompatActivity() {
      * Sends a password reset email to the user's email address.
      */
     private fun tryResetPassword() {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+        
         val email = binding.tieEmailLogin.text.toString()
         val required = getString(R.string.required)
         val emailPattern = "[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}".toRegex()

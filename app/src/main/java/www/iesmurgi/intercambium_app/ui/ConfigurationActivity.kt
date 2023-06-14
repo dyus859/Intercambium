@@ -122,6 +122,10 @@ class ConfigurationActivity : AppCompatActivity() {
      * Handles the click event for the edit password button.
      */
     private fun onEditPasswordClick() {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         val title = getString(R.string.dialog_edit_password_title)
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_password, null)
         val editPasswordBinding = DialogEditPasswordBinding.bind(view)
@@ -131,6 +135,10 @@ class ConfigurationActivity : AppCompatActivity() {
         with(editPasswordBinding) {
             btnCancelPassword.setOnClickListener { alertDialog.dismiss() }
             btnApplyPassword.setOnClickListener {
+                if (!Utils.checkAndShowNetworkNotAvailable(this@ConfigurationActivity)) {
+                    return@setOnClickListener
+                }
+
                 val currentPassword = tieUserCurrentPassword.text.toString()
                 val newPassword = tieUserNewPassword.text.toString()
                 val required = getString(R.string.required)
@@ -198,6 +206,10 @@ class ConfigurationActivity : AppCompatActivity() {
      * Handles the click event for the edit name button.
      */
     private fun onEditNameClick() {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         val title = getString(R.string.dialog_edit_name_title)
 
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_name, null)
@@ -208,6 +220,11 @@ class ConfigurationActivity : AppCompatActivity() {
         with(editNameBinding) {
             btnCancelName.setOnClickListener { alertDialog.dismiss() }
             btnApplyName.setOnClickListener {
+                if (!Utils.checkAndShowNetworkNotAvailable(this@ConfigurationActivity)) {
+                    alertDialog.dismiss()
+                    return@setOnClickListener
+                }
+
                 val text = tieUserName.text.toString().trim()
                 val required = getString(R.string.required)
 
@@ -258,6 +275,10 @@ class ConfigurationActivity : AppCompatActivity() {
      *  or [takeImage]) is called, and the dialog is dismissed.
      */
     private fun onEditProfilePictureClick() {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         val title = getString(R.string.edit_image_title)
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_image, null)
         val editImageBinding = DialogEditImageBinding.bind(view)
@@ -285,6 +306,11 @@ class ConfigurationActivity : AppCompatActivity() {
 
             // User has selected 'Delete photo'
             btnDeletePhotoUser.setOnClickListener {
+                if (!Utils.checkAndShowNetworkNotAvailable(this@ConfigurationActivity)) {
+                    alertDialog.dismiss()
+                    return@setOnClickListener
+                }
+
                 if (user.photoUrl.isNotEmpty()) {
                     Utils.deleteFirebaseImage(user.photoUrl)
                     user.photoUrl = ""
@@ -327,6 +353,10 @@ class ConfigurationActivity : AppCompatActivity() {
      *  before setting the new URL.
      */
     private fun uploadAndSetProfilePicture() {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         // Show ProgressBar
         binding.pbConfiguration.visibility = View.VISIBLE
         binding.pbConfiguration.show()
@@ -376,6 +406,10 @@ class ConfigurationActivity : AppCompatActivity() {
      * @param url The URL of the updated profile picture.
      */
     private fun updateUserProfilePicture(url: String) {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         val db = Firebase.firestore
         val usersCollection = db.collection(Constants.COLLECTION_USERS)
         usersCollection.document(user.email)
@@ -390,8 +424,16 @@ class ConfigurationActivity : AppCompatActivity() {
      * Handles the click event for the delete account button.
      */
     private fun onDeleteAccountClick() {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         val title = getString(R.string.dialog_delete_account_title)
         Utils.createConfirmationAlertDialog(this, title) {
+            if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+                return@createConfirmationAlertDialog
+            }
+
             deleteAccount()
         }
     }
@@ -400,6 +442,10 @@ class ConfigurationActivity : AppCompatActivity() {
      * Deletes the user's account and associated data.
      */
     private fun deleteAccount() {
+        if (!Utils.checkAndShowNetworkNotAvailable(this)) {
+            return
+        }
+
         // Delete Firebase Firestore information associated to the account
         val db = Firebase.firestore
         val usersCollections = db.collection(Constants.COLLECTION_USERS)

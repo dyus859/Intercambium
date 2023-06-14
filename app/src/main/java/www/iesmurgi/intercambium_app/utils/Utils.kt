@@ -8,6 +8,7 @@ import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
@@ -236,5 +237,22 @@ object Utils {
             }
         }
         return false
+    }
+
+    /**
+     * Checks if the network is available and shows a toast message if it's not.
+     *
+     * @param context The context used to access system services.
+     * @return `true` if the network is available, `false` otherwise.
+     */
+    fun checkAndShowNetworkNotAvailable(context: Context): Boolean {
+        val isNetworkAvailable = isNetworkAvailable(context)
+
+        if (!isNetworkAvailable) {
+            val msg = context.getString(R.string.no_access_to_internet)
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
+
+        return isNetworkAvailable
     }
 }
