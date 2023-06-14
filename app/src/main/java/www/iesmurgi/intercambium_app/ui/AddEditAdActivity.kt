@@ -104,8 +104,12 @@ class AddEditAdActivity : AppCompatActivity() {
         // Return to the previous activity
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        val extras = intent.extras
+
+        val editing = extras?.getString("AD") != null
+
         // Set ActionBar title
-        supportActionBar?.title = if (!isEditing()) {
+        supportActionBar?.title = if (!editing) {
             getString(R.string.publish_ad)
         } else {
             getString(R.string.edit_ad)
