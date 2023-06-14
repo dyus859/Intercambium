@@ -16,4 +16,5 @@ data class Chat(
     val receiverUser: User = User(),
     val lastMsg: String = "",
     val lastImageUrl: String = "",
+    val lastMsgTime: Long = 0L,
 ) : java.io.Serializable

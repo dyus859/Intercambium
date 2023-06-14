@@ -202,7 +202,8 @@ class ChatsFragment : Fragment() {
                                             chatId,
                                             user,
                                             latestMessage?.content ?: "",
-                                            latestMessage?.imageUrl ?: ""
+                                            latestMessage?.imageUrl ?: "",
+                                            latestMessage?.timeStamp ?: 0L // Store the latest message time
                                         )
                                         chatList.add(chat)
                                     }
@@ -220,13 +221,14 @@ class ChatsFragment : Fragment() {
                     // Await completion of all user tasks
                     userTasks.awaitAll()
 
-                    // Clear the existing chat list and add the new chat items
+                    // Sort the chatList based on the latest message time (newest to oldest)
+                    val sortedChatList = chatList.sortedByDescending { it.lastMsgTime }
+
                     adapter.chatsList.apply {
                         clear()
-                        addAll(chatList)
+                        addAll(sortedChatList)
                     }
 
-                    // Notify the adapter of the changes
                     adapter.notifyDataSetChanged()
 
                     handleNoAdsMsg()
