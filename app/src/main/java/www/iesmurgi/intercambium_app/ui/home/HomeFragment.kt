@@ -145,7 +145,13 @@ class HomeFragment : Fragment() {
             binding.rvAdsHome.setOnScrollChangeListener { _, _, _, _, _ ->
                 if (!binding.rvAdsHome.canScrollVertically(1) && !isLoadingMore) {
                     isLoadingMore = true
-                    loadAdsFromDB(query = "", loadMore = true)
+
+                    if (filtering) {
+                        val query = if (binding.svAds.query.isNullOrBlank()) "" else binding.svAds.query.toString().trim()
+                        loadAdsFromDB(query, loadMore = true)
+                    } else {
+                        loadAdsFromDB("", loadMore = true)
+                    }
                 }
             }
         }
@@ -229,7 +235,6 @@ class HomeFragment : Fragment() {
                     // Sort by created_at field (descending order) to always show the newest
                     val sortedDocuments = mergedDocuments.sortedByDescending {
                         val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
-                        println(timestamp)
                         java.util.Date(timestamp)
                     }
                     processQueryResults(sortedDocuments, loadMore)
@@ -258,6 +263,8 @@ class HomeFragment : Fragment() {
         if (!loadMore) {
             adapter.adList.clear()
         }
+
+        println("adDocuments: $adDocuments, loadMore: $loadMore")
 
         val db = Firebase.firestore
         val usersCollection = db.collection(Constants.COLLECTION_USERS)

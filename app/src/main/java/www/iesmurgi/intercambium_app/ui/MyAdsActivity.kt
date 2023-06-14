@@ -127,7 +127,13 @@ class MyAdsActivity : AppCompatActivity() {
             binding.rvAdsMyAds.setOnScrollChangeListener { _, _, _, _, _ ->
                 if (!binding.rvAdsMyAds.canScrollVertically(1) && !isLoadingMore) {
                     isLoadingMore = true
-                    loadAdsFromDB(query = "", loadMore = true)
+
+                    if (filtering) {
+                        val query = if (binding.svMyAds.query.isNullOrBlank()) "" else binding.svMyAds.query.toString().trim()
+                        loadAdsFromDB(query, loadMore = true)
+                    } else {
+                        loadAdsFromDB("", loadMore = true)
+                    }
                 }
             }
         }
@@ -213,7 +219,6 @@ class MyAdsActivity : AppCompatActivity() {
                     // Sort by created_at field (descending order) to always show the newest
                     val sortedDocuments = mergedDocuments.sortedByDescending {
                         val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
-                        println(timestamp)
                         java.util.Date(timestamp)
                     }
                     processQueryResults(sortedDocuments, loadMore)
