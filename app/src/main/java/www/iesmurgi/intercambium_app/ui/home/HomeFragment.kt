@@ -13,6 +13,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import www.iesmurgi.intercambium_app.R
 import www.iesmurgi.intercambium_app.databinding.FragmentHomeBinding
 import www.iesmurgi.intercambium_app.utils.DbUtils.Companion.toAd
@@ -198,6 +203,7 @@ class HomeFragment : Fragment() {
                     // Sort by created_at field (descending order) to always show the newest
                     val sortedDocuments = mergedDocuments.sortedByDescending {
                         val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
+                        println(timestamp)
                         java.util.Date(timestamp)
                     }
                     processQueryResults(sortedDocuments)
@@ -208,18 +214,11 @@ class HomeFragment : Fragment() {
         } else {
             // There is no query, execute it directly
 
-            queryTask.get()
-                .addOnSuccessListener { adDocuments ->
-                    // Sort by created_at field (descending order) to always show the newest
-                    val sortedDocuments = adDocuments.documents.sortedByDescending {
-                        val timestamp = it.getLong(Constants.ADS_FIELD_CREATED_AT) ?: 0
-                        java.util.Date(timestamp)
-                    }
-                    processQueryResults(sortedDocuments)
-                }
-                .addOnFailureListener {
-                    handleNoAdsMsg()
-                }
+            queryTask.get().addOnSuccessListener { adDocuments ->
+                processQueryResults(adDocuments.documents)
+            }.addOnFailureListener {
+                handleNoAdsMsg()
+            }
         }
     }
 
@@ -235,36 +234,51 @@ class HomeFragment : Fragment() {
         // Create a list to hold the new ad items
         val newAdList = mutableListOf<Ad>()
 
-        // Process each ad document in parallel
-        val tasks = adDocuments.map { adDocument ->
+        // Create a HashSet to keep track of unique ad IDs
+        val uniqueAdIds = HashSet<String>()
+
+        // Create a coroutine scope
+        val coroutineScope = CoroutineScope(Dispatchers.Main)
+
+        // Create a suspend function to process each ad document
+        suspend fun processAdDocument(adDocument: DocumentSnapshot) {
             val author = adDocument.getString(Constants.ADS_FIELD_AUTHOR).toString()
             val usersDocument = usersCollection.document(author)
-            usersDocument.get().addOnSuccessListener { userDocument ->
-                // If this account doesn't exist anymore, don't show the ad
-                if (userDocument.exists()) {
-                    val user = userDocument.toUser()
-                    val ad = adDocument.toAd(user)
+            val userDocument = withContext(Dispatchers.IO) { usersDocument.get().await() }
 
-                    if (Utils.isAdVisibleForUser(ad)) {
-                        newAdList.add(ad)
-                    }
+            // If this account doesn't exist anymore, don't show the ad
+            if (userDocument.exists()) {
+                val user = userDocument.toUser()
+                val ad = adDocument.toAd(user)
+
+                if (Utils.isAdVisibleForUser(ad) && !uniqueAdIds.contains(ad.id)) {
+                    newAdList.add(ad)
+                    uniqueAdIds.add(ad.id)
                 }
             }
         }
 
-        // Wait for all tasks to complete
-        Tasks.whenAllSuccess<DocumentSnapshot>(tasks)
-            .addOnCompleteListener {
-                // Clear the existing ad list and add the new ad items
-                adapter.adList.clear()
-                adapter.adList.addAll(newAdList)
-
-                // Notify the adapter of the changes
-                adapter.notifyDataSetChanged()
-
-                // Handle no ads message
-                handleNoAdsMsg()
+        // Create a suspend function to process all ad documents sequentially
+        suspend fun processAllAdDocuments() {
+            for (adDocument in adDocuments) {
+                processAdDocument(adDocument)
             }
+        }
+
+        // Start the coroutine to process all ad documents sequentially
+        coroutineScope.launch {
+            processAllAdDocuments()
+
+            // Clear the existing ad list and add the new ad items
+            adapter.adList.clear()
+            adapter.adList.addAll(newAdList)
+
+            // Notify the adapter of the changes
+            adapter.notifyDataSetChanged()
+
+            // Handle no ads message
+            handleNoAdsMsg()
+        }
 
         if (adDocuments.isEmpty()) {
             handleNoAdsMsg()
@@ -275,6 +289,10 @@ class HomeFragment : Fragment() {
      * Handles the visibility of the 'No ads' message based on the presence and visibility of ads.
      */
     private fun handleNoAdsMsg() {
+        if (!isAdded) {
+            return
+        }
+
         with(binding) {
             // Hide Swipe Refresh animation
             swipeRefreshLayoutHome.isRefreshing = false

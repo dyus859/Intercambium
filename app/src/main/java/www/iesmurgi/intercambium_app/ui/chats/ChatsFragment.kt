@@ -255,11 +255,15 @@ class ChatsFragment : Fragment() {
      * Handles the visibility of the 'No chats' message based on the presence and visibility of chats.
      */
     private fun handleNoAdsMsg() {
+        if (!isAdded) {
+            return
+        }
+
         with(binding) {
             // Hide Swipe Refresh animation
             swipeRefreshLayoutChats.isRefreshing = false
 
-            tvNoChats.text = getString(R.string.no_chats)
+            tvNoChats.text = requireContext().getString(R.string.no_chats)
             tvNoChats.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
         }
     }
