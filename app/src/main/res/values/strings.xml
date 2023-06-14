@@ -89,4 +89,5 @@
     <string name="you_successfully_deleted_your_profile_picture">Ha eliminado con éxito su foto de perfil.</string>
     <string name="article_value">Valor del artículo</string>
     <string name="rating_required">El valor del artículo es obligatorio a establecer</string>
+    <string name="no_access_to_internet">No hay acceso a Internet</string>
 </resources>

@@ -144,6 +144,15 @@ class ChatsFragment : Fragment() {
      * @param query The search query string. Default is an empty string.
      */
     private fun loadChatsFromDB(query: String = "") {
+        val isNetWorkAvailable = Utils.isNetworkAvailable(requireContext())
+
+        if (!isNetWorkAvailable) {
+            binding.swipeRefreshLayoutChats.isRefreshing = false
+            binding.tvNoChats.text = getString(R.string.no_access_to_internet)
+            binding.tvNoChats.visibility = View.VISIBLE
+            return
+        }
+
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         // Show Swipe Refresh animation
@@ -250,6 +259,7 @@ class ChatsFragment : Fragment() {
             // Hide Swipe Refresh animation
             swipeRefreshLayoutChats.isRefreshing = false
 
+            tvNoChats.text = getString(R.string.no_chats)
             tvNoChats.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
         }
     }

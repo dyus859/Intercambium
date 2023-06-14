@@ -90,4 +90,5 @@
     <string name="you_successfully_deleted_your_profile_picture">Вы успешно удалили свое фото профиля.</string>
     <string name="article_value">Ценность товара</string>
     <string name="rating_required">Необходимо указать ценность товара</string>
+    <string name="no_access_to_internet">Нет доступа к Интернету</string>
 </resources>

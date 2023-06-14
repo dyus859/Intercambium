@@ -34,8 +34,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        println("onMessageReceived")
-
         // Handle the received message and generate the notification
         remoteMessage.notification?.let { notification ->
             val body = notification.body

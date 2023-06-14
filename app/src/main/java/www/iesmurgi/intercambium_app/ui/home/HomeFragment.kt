@@ -161,6 +161,15 @@ class HomeFragment : Fragment() {
      * @param query The search query string. Default is an empty string.
      */
     private fun loadAdsFromDB(query: String = "") {
+        val isNetWorkAvailable = Utils.isNetworkAvailable(requireContext())
+
+        if (!isNetWorkAvailable) {
+            binding.swipeRefreshLayoutHome.isRefreshing = false
+            binding.tvNoAdsHome.text = getString(R.string.no_access_to_internet)
+            binding.tvNoAdsHome.visibility = View.VISIBLE
+            return
+        }
+
         // Show Swipe Refresh animation
         binding.swipeRefreshLayoutHome.isRefreshing = true
 
@@ -270,6 +279,7 @@ class HomeFragment : Fragment() {
             // Hide Swipe Refresh animation
             swipeRefreshLayoutHome.isRefreshing = false
 
+            tvNoAdsHome.text = getString(R.string.no_ads)
             tvNoAdsHome.visibility = if (adapter.itemCount == 0) View.VISIBLE else View.GONE
         }
     }
