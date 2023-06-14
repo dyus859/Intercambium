@@ -79,9 +79,13 @@ class AdAdapter(
                 sivItemAdUserPhoto.setImageResource(R.drawable.default_avatar)
             }
 
+
             // When user clicks on the CardView
             root.setOnClickListener {
-                onItemClick(adList[adapterPosition])
+                // This check prevents crash
+                if (adList.size > adapterPosition) {
+                    onItemClick(adList[adapterPosition])
+                }
             }
         }
     }
