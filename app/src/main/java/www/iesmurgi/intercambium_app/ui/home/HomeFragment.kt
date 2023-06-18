@@ -1,11 +1,12 @@
 package www.iesmurgi.intercambium_app.ui.home
 
+import android.content.Context.LAYOUT_INFLATER_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -54,6 +55,9 @@ class HomeFragment : Fragment() {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        // Enable options menu
+        setHasOptionsMenu(true)
+
         // Prevents "E/RecyclerView: No adapter attached; skipping layout"
         recyclerView(false)
 
@@ -64,6 +68,41 @@ class HomeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         recyclerView()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_app_info, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.item_app_info) {
+            showAppInfoPopup()
+        }
+
+        return true
+    }
+
+    private fun showAppInfoPopup() {
+        val context = requireContext()
+        val inflater = context.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val popupView = inflater.inflate(R.layout.popup_app_info, null)
+
+        val width = LinearLayout.LayoutParams.MATCH_PARENT
+        val height = LinearLayout.LayoutParams.WRAP_CONTENT
+        val popupWindow = PopupWindow(popupView, width, height)
+        val rootView = requireActivity().findViewById<View?>(android.R.id.content).rootView
+
+        popupWindow.isFocusable = true
+        popupWindow.isOutsideTouchable = true
+        popupWindow.animationStyle = R.style.popup_window_animation
+        popupWindow.showAtLocation(rootView, Gravity.BOTTOM, 0, 0)
+
+        popupView.setOnTouchListener { view, _ ->
+            popupWindow.dismiss()
+            view.performClick()
+            true
+        }
     }
 
     /**

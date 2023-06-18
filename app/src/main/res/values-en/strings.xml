@@ -91,4 +91,6 @@
     <string name="article_value">Article Value</string>
     <string name="rating_required">The article value is required to set</string>
     <string name="no_access_to_internet">No access to Internet</string>
+    <string name="app_info_author">IES Murgi, Denis Yushkin\ndyus859@g.educaand.es</string>
+    <string name="app_info_developer">App Developer</string>
 </resources>

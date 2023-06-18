@@ -192,12 +192,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    /**
-     * Inflate the options menu for the Profile fragment.
-     *
-     * @param menu The Menu object to inflate.
-     * @param inflater The MenuInflater object that can be used to inflate the menu.
-     */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         if (FirebaseAuth.getInstance().currentUser != null) {
             inflater.inflate(R.menu.menu_sign_out, menu)
@@ -206,12 +200,6 @@ class ProfileFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    /**
-     * Handles options menu item selections.
-     *
-     * @param item The selected [MenuItem] object.
-     * @return True if the selection was handled, false otherwise.
-     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.item_sign_out && FirebaseAuth.getInstance().currentUser != null) {
             showSignOutDialog()
