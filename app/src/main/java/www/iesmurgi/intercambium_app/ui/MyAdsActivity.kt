@@ -205,8 +205,9 @@ class MyAdsActivity : AppCompatActivity() {
 
         if (query.isNotEmpty()) {
             // Create both tasks (documents containing title and documents containing description)
-            val titleQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_TITLE_SEARCH, query)
-            val descriptionQuery = adsCollection.whereArrayContains(Constants.ADS_FIELD_DESCRIPTION_SEARCH, query)
+            val queryWords = query.split(" ")
+            val titleQuery = adsCollection.whereArrayContainsAny(Constants.ADS_FIELD_TITLE_SEARCH, queryWords)
+            val descriptionQuery = adsCollection.whereArrayContainsAny(Constants.ADS_FIELD_DESCRIPTION_SEARCH, queryWords)
 
             val titleTask = titleQuery.get()
             val descriptionTask = descriptionQuery.get()
@@ -251,6 +252,7 @@ class MyAdsActivity : AppCompatActivity() {
         // Clear the existing ad list only if it's not a load more operation
         if (!loadMore) {
             adapter.adList.clear()
+            adapter.notifyDataSetChanged()
         }
 
         val db = Firebase.firestore
